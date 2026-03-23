@@ -1,5 +1,3 @@
-# `map-email-signup.ts` — behaviour and wiring
-
 **File:** `apps/web/src/utils/prop-mappers/map-email-signup.ts`  
 **Block:** `map-email-signup`
 **Feature:** WFP1-527 asset file type and size display

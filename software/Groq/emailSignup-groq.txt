@@ -1,0 +1,281 @@
+Groq:
+*[_type == "emailSignup"] {
+  // Raw caption:
+  // caption
+
+  // First text node only:
+  // "firstText": caption[0].children[0].text,
+
+  // Flatten all text:
+  // "texts": caption[].children[].text
+
+  // Preserve block structure:
+  caption[]{
+      _key,
+      children[]{
+        _key,
+        text
+      }
+    }
+}
+
+json:
+
+[
+  {
+    "caption": [
+      {
+        "_key": "3ab4a5e4570f",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "43285e317fdc",
+            "_type": "span",
+            "marks": [],
+            "text": "By clicking"
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ]
+  },
+  {
+    "caption": [
+      {
+        "_key": "68ac0eb263d6",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "7ba26fe07395",
+            "_type": "span",
+            "marks": [],
+            "text": "By subscribing you agree to our "
+          },
+          {
+            "_key": "3f80c0cd45dd",
+            "_type": "span",
+            "marks": [
+              "5a33347d7d0a"
+            ],
+            "text": "privacy policy"
+          },
+          {
+            "_key": "a196db1fb7cb",
+            "_type": "span",
+            "marks": [],
+            "text": ". "
+          },
+          {
+            "_key": "f11bfa8b899f",
+            "_type": "span",
+            "marks": [
+              "f5442dbe011b"
+            ],
+            "text": "Testing Asset Links"
+          }
+        ],
+        "markDefs": [
+          {
+            "_key": "5a33347d7d0a",
+            "_type": "link",
+            "linkType": "internal",
+            "page": {
+              "_ref": "e9c943ea-732b-4bff-ba31-a503d0d42edd",
+              "_type": "reference"
+            }
+          },
+          {
+            "_key": "f5442dbe011b",
+            "_type": "link",
+            "asset": {
+              "file": {
+                "_ref": "b9073c1d-a233-40d8-b62c-d5df42558e01",
+                "_type": "reference"
+              }
+            },
+            "linkType": "asset"
+          }
+        ],
+        "style": "normal"
+      }
+    ]
+  },
+  {
+    "caption": [
+      {
+        "_key": "8c67e10eb145",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "ce7abdf81fce",
+            "_type": "span",
+            "marks": [],
+            "text": "Joe blogs"
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ]
+  },
+  {
+    "caption": [
+      {
+        "_key": "acfeac097ddf",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "7fa88b987e12",
+            "_type": "span",
+            "marks": [
+              "ca8f57e21b2e"
+            ],
+            "text": "Testing"
+          }
+        ],
+        "markDefs": [
+          {
+            "_key": "ca8f57e21b2e",
+            "_type": "link"
+          }
+        ],
+        "style": "normal"
+      }
+    ]
+  },
+  {
+    "caption": null
+  },
+  {
+    "caption": [
+      {
+        "_key": "3ab4a5e4570f",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "43285e317fdc",
+            "_type": "span",
+            "marks": [],
+            "text": "By clicking"
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ]
+  },
+  {
+    "caption": [
+      {
+        "_key": "ff766ed5ee6e",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "7a1fc7681d35",
+            "_type": "span",
+            "marks": [],
+            "text": "Joe Blogs"
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ]
+  },
+  {
+    "caption": [
+      {
+        "_key": "9734037a95d6",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "ecf07e7d690e",
+            "_type": "span",
+            "marks": [],
+            "text": "Caption: "
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      },
+      {
+        "_key": "03733489ba1d",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "af9b980f359a",
+            "_type": "span",
+            "marks": [
+              "f2b9eb899fe6"
+            ],
+            "text": "asset link"
+          }
+        ],
+        "markDefs": [
+          {
+            "_key": "f2b9eb899fe6",
+            "_type": "link",
+            "asset": {
+              "file": {
+                "_ref": "7db1610a-5e6e-4e26-ad34-327a7dddb747",
+                "_type": "reference"
+              }
+            },
+            "linkType": "asset"
+          }
+        ],
+        "style": "normal"
+      },
+      {
+        "_key": "be3d7fb415f6",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "2f0b799d5573",
+            "_type": "span",
+            "marks": [
+              "66428909d7c2"
+            ],
+            "text": "internal link"
+          }
+        ],
+        "markDefs": [
+          {
+            "_key": "66428909d7c2",
+            "_type": "link",
+            "linkType": "internal",
+            "page": {
+              "_ref": "0286b9df-182a-47e4-9eef-12751142af8f",
+              "_type": "reference"
+            }
+          }
+        ],
+        "style": "normal"
+      },
+      {
+        "_key": "d6fae7c6c082",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "b357bbbe5cf9",
+            "_type": "span",
+            "marks": [
+              "53c1eace8e7d"
+            ],
+            "text": "external link"
+          }
+        ],
+        "markDefs": [
+          {
+            "_key": "53c1eace8e7d",
+            "_type": "link",
+            "linkType": "external",
+            "url": "https://www.google.co.uk"
+          }
+        ],
+        "style": "normal"
+      }
+    ]
+  }
+]
