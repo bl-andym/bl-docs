@@ -1,0 +1,34 @@
+Dev prompt for domain-based icon suppression:
+Make the domain-based icon suppression change needed for the call site in @apps/web/src/utils/prop-mappers/map-button-banner.ts only
+
+You are a senior software engineer performing a formal change review for domain-based icon suppression.
+
+Analyze @apps/web/src/utils/link-utils.ts and generate a detailed change documentation report.
+
+Your output must:
+
+1. Clearly describe what changed compared to the previous version.
+2. Include BEFORE and AFTER code snippets for every modification.
+3. Explain the rationale behind each change.
+4. Identify whether the change is:
+   - Refactor
+   - Bug fix
+   - Performance improvement
+   - Type safety improvement
+   - Architectural change
+   - Security improvement
+   - New feature
+5. Explain any new functions, variables, imports, types, or dependencies introduced.
+6. Generate a .md file I can download
+
+Formatting rules:
+- Output plain text only.
+- No markdown.
+- No emojis.
+- No conversational tone.
+- Use clear section headers in ALL CAPS.
+- Use consistent indentation.
+- Make it suitable for internal technical documentation.
+
+Assume the reader is an experienced developer but unfamiliar with this specific change.
+Be precise and do not speculate beyond the code.
