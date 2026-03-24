@@ -7,13 +7,13 @@ Transforms a CMS **Email signup** content block (`EmailSignup` from the page API
 
 ## Logic
 
-| Input field | Output prop | Transformation |
-|-------------|-------------|----------------|
-| `title`, `description`, `firstNamePlaceholder`, `emailPlaceholder`, `buttonText`, `genericErrorText`, `alreadySignedUpErrorText` | Same names | Passed through unchanged |
-| `caption` | `caption` | `mapRichText(emailSignup.caption)` — portable text → component-ready rich text (links, marks, including asset links) |
-| `succesText` | `succesText` | `mapRichText(emailSignup.succesText)` — same as above (schema spelling: `succesText`) |
-| — | `form` | Placeholder `{ endpoint: '' }` — **overridden** at render time |
-| — | `captcha` | Placeholder `{ siteKey: '' }` — **overridden** at render time |
+| Input field                                                                                                                      | Output prop  | Transformation                                                                                                       |
+| -------------------------------------------------------------------------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `title`, `description`, `firstNamePlaceholder`, `emailPlaceholder`, `buttonText`, `genericErrorText`, `alreadySignedUpErrorText` | Same names   | Passed through unchanged                                                                                             |
+| `caption`                                                                                                                        | `caption`    | `mapRichText(emailSignup.caption)` — portable text → component-ready rich text (links, marks, including asset links) |
+| `succesText`                                                                                                                     | `succesText` | `mapRichText(emailSignup.succesText)` — same as above (schema spelling: `succesText`)                                |
+| —                                                                                                                                | `form`       | Placeholder `{ endpoint: '' }` — **overridden** at render time                                                       |
+| —                                                                                                                                | `captcha`    | Placeholder `{ siteKey: '' }` — **overridden** at render time                                                        |
 
 There is no branching: one object in, one props object out.
 
