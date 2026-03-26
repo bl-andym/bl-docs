@@ -1,9 +1,8 @@
-**File:** `apps/studio/src/schema/documents/components/media-download-grid.ts  
+**File:** apps/studio/src/schema/documents/components/media-download-grid.ts  
 **Block:** `items[]`  
 **Feature:** WFP1-527 asset file type and size display
 
 ------------------------------------------------------------------------
-
 # What changed
 
 The `items` field is defined as an **array**.
