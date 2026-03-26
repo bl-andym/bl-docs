@@ -1,4 +1,6 @@
-# Purpose of `content-blocks.ts`
+**File:** `apps/web/src/types/content-blocks.ts`
+**Block:** block-level TypeScript types 
+**Feature:** WFP1-527 asset file type and size display
 
 ## Overview
 

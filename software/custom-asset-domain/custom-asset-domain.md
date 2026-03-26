@@ -23,13 +23,13 @@ In that case:
 
 ### customAssetsDomain — usage by file (with snippets)
 
-| File                  | Use                                                | Snippet                                                                                    | Rationale                                                                                    |
-| --------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
-| config/config.ts      | Set custom asset domain in production config       | `customAssetsDomain: 'https://www.bl.uk',`                                                 | Production uses branded asset URLs (`www.bl.uk`). Other environments fall back to `baseUrl`. |
-| config/types.ts       | Optional config field defining custom asset domain | `customAssetsDomain?: string;`                                                             | Allows configuration to override the default asset base URL.                                 |
-| sanity/image.ts (L18) | Image URL builder uses optional custom domain      | `baseUrl: clientConfig.customAssetsDomain ?? undefined,`                                   | Images resolve to the custom domain in production.                                           |
-| sanity/image.ts (L47) | File/PDF URL builder uses custom domain if present | `baseUrl: serverConfig.customAssetsDomain ?? serverConfig.baseUrl,`                        | Download links include the branded domain and filename.                                      |
-| layout.tsx (L38)      | Preconnect to asset origin for performance         | `<link rel="preconnect" href={serverConfig.customAssetsDomain ?? serverConfig.baseUrl} />` | Preconnect reduces latency for the first asset request.                                      |
+| File             | Use                                                | Snippet                                                                                    | Rationale                                                                                    |
+| ---------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| config/config.ts | Set custom asset domain in production config       | `customAssetsDomain: 'https://www.bl.uk',`                                                 | Production uses branded asset URLs (`www.bl.uk`). Other environments fall back to `baseUrl`. |
+| config/types.ts  | Optional config field defining custom asset domain | `customAssetsDomain?: string;`                                                             | Allows configuration to override the default asset base URL.                                 |
+| sanity/image.ts  | Image URL builder uses optional custom domain      | `baseUrl: clientConfig.customAssetsDomain ?? undefined,`                                   | Images resolve to the custom domain in production.                                           |
+| sanity/image.ts  | File/PDF URL builder uses custom domain if present | `baseUrl: serverConfig.customAssetsDomain ?? serverConfig.baseUrl,`                        | Download links include the branded domain and filename.                                      |
+| layout.tsx       | Preconnect to asset origin for performance         | `<link rel="preconnect" href={serverConfig.customAssetsDomain ?? serverConfig.baseUrl} />` | Preconnect reduces latency for the first asset request.                                      |
 
 ### Why dev/staging config doesn’t set `customAssetsDomain` to the BL domain
 

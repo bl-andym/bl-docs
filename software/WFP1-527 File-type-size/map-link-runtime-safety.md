@@ -77,6 +77,15 @@ case 'asset': {
 }
 ```
 
+## Rationale
+
+The `!link.asset` guard ensures that `link.asset` is not null or undefined before using the `in` operator.
+
+- `'asset' in link` only guarantees the property exists — not that it has a usable value  
+- Without this guard, `'assetType' in link.asset` can throw at runtime if `link.asset` is null or undefined  
+- This protects against malformed or partially populated CMS data  
+
+**Net effect:** prevents runtime crashes and ensures the function fails safely (`undefined`) instead of breaking execution.
 ## Additional Context: File Size & Type Handling
 
 Displaying file metadata (size/type) requires a valid asset object. Even
@@ -107,9 +116,9 @@ can throw before UI renders.
 
 ## Net Effect
 
--   Prevents runtime crashes\
--   Handles malformed CMS data safely\
--   Ensures fail-safe behavior\
+-   Prevents runtime crashes
+-   Handles malformed CMS data safely
+-   Ensures fail-safe behaviour
 -   Protects UI rendering paths
 
 ## Key Takeaway
