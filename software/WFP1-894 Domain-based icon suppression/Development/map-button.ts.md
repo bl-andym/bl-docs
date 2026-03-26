@@ -1,6 +1,6 @@
-# Formal Change Documentation: map-button.ts
-
-**File:** `apps/web/src/utils/prop-mappers/map-button.ts`
+**File:** apps/web/src/utils/prop-mappers/map-button.ts
+**Block:** mapButton
+**Feature:** WFP1-894 Domain-based icon suppression
 
 ---
 

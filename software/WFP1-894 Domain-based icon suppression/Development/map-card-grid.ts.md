@@ -1,6 +1,6 @@
-# Formal Change Documentation: map-card-grid.ts
-
-**File:** `apps/web/src/utils/prop-mappers/map-card-grid.ts`
+**File:** apps/web/src/utils/prop-mappers/map-card-grid.ts
+**Block:** getLinkIcon (updated to receive the mapped link's href )
+**Feature:** WFP1-894 Domain-based icon suppression
 
 ---
 

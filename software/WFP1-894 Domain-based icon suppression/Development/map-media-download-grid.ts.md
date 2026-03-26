@@ -1,6 +1,6 @@
-# Formal Change Documentation: map-media-download-grid.ts (Domain-Based Icon Suppression)
-
-**File:** `apps/web/src/utils/prop-mappers/map-media-download-grid.ts`
+**File:** apps/web/src/utils/prop-mappers/map-media-download-grid.ts
+**Block:** getLinkIcon
+**Feature:** WFP1-894 Domain-based icon suppression
 
 ---
 

@@ -1,6 +1,6 @@
-# Formal Change Documentation: map-hub-hero-banner.ts
-
-**File:** `apps/web/src/utils/prop-mappers/map-hub-hero-banner.ts`
+**File:** apps/web/src/utils/prop-mappers/map-hub-hero-banner.ts
+**Block:** mapHubHeroBanner
+**Feature:** WFP1-894 Domain-based icon suppression
 
 ---
 

@@ -1,6 +1,6 @@
-# Formal Change Documentation: map-text-card-banner.ts (Domain-Based Icon Suppression)
-
-**File:** `apps/web/src/utils/prop-mappers/map-text-card-banner.ts`
+**File:** apps/web/src/utils/prop-mappers/map-text-card-banner.ts
+**Block:** mapTextCardBanner
+**Feature:** WFP1-894 Domain-based icon suppression
 
 ---
 

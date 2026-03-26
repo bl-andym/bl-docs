@@ -1,6 +1,6 @@
-# Formal Change Documentation: link-utils.ts
-
-**File:** `apps/web/src/utils/link-utils.ts`
+**File:** apps/web/src/utils/link-utils.ts
+**Block:** isBlUkDomain(href: string)
+**Feature:** WFP1-894 Domain-based icon suppression
 
 ---
 

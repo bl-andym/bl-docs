@@ -1,6 +1,6 @@
-# Formal Change Documentation: map-link.ts
-
-**File:** `apps/web/src/utils/prop-mappers/map-link.ts`
+**File:** apps/web/src/utils/prop-mappers/map-link.ts
+**Block:** domain-based icon suppression
+**Feature:** WFP1-894 Domain-based icon suppression
 
 ---
 

@@ -1,6 +1,6 @@
-# Formal Change Documentation: map-list-card-grid-and-banner.ts (Domain-Based Icon Suppression)
-
-**File:** `apps/web/src/utils/prop-mappers/map-list-card-grid-and-banner.ts`
+**File:** apps/web/src/utils/prop-mappers/map-list-card-grid-and-banner.ts
+**Block:** getLinkIcon inside mapListCardGridOrBanner
+**Feature:** WFP1-894 Domain-based icon suppression
 
 ---
 
