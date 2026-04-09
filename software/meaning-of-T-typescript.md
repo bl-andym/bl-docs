@@ -2,7 +2,7 @@
 
 Behold, good coder, this humble mark: <T>,
 A sigil woven not of mortal thread,
-But forged within the realm of types unseen—
+But forged within the realm of types unseen
 A ghostly name the compiler alone may wed.
 
 It is no value, nor a shape of clay,
@@ -15,5 +15,5 @@ Lo! T becomes the payload thou declarest;
 And every place where T within is laid,
 Takes on that shape, as if by magic fairest.
 
-Thus <T> stands: a placeholder, wise and free—
+Thus <T> stands: a placeholder, wise and free
 Not what is, but what may yet come to be.
