@@ -1,0 +1,25 @@
+Docs: How to do a release to NLE:
+Video: Workshop: Tech lead handover, Deploy to NLE
+URL: https://bluk-my.sharepoint.com/personal/andrew_marsden_bl_uk/_layouts/15/stream.aspx?id=%2Fpersonal%2Fandrew_marsden_bl_uk%2FDocuments%2FRecordings%2FWorkshop+weekly+workshop-20260312_150334-Meeting+Recording.mp4&referrer=StreamWebApp.Web&referrerScenario=AddressBarCopied.view.3b6d6aea-b4e0-47af-90d9-3400d7ce9897&startedResponseCatch=true
+
+Q: Where do we cut the new Sprint branch from?
+A: From Develop
+
+Q: Get the name from where?
+A: Go to releases in jira (elaborate)
+
+Q: When to run npm version
+A: Once the sprint branch is made (updates package.json version)
+
+Q: When to publish:
+A: After we run 'run npm version'
+
+Q: What next?
+A: Go to git -> actions -> LHC - Deploy NLE
+see: 
+- bau-template.txt on new pc for Devops pipeline url
+- review Agent job (slots: BL NLE Slot)
+- go to webfproj-web-105-is-staging: check version
+	version: n
+	commitHash: from github
+

@@ -18,6 +18,14 @@ https://bluk-my.sharepoint.com/personal/andrew_marsden_bl_uk/_layouts/15/stream.
 ### Q: Where do we cut the new Sprint branch from?
 **A:** From `develop`
 
+Branch flow:  
+1. feature cut from develop   
+2. feature merge back to develop  
+3. sprint cut from develop  
+4. sprint merge into main  
+5. main merge into develop  
+6. develop cut feature
+
 ---
 
 ### Q: Where do we get the branch name from?
@@ -46,7 +54,7 @@ https://bluk-my.sharepoint.com/personal/andrew_marsden_bl_uk/_layouts/15/stream.
 1. Go to **GitHub → Actions**
 2. Select workflow: **LHC - Deploy NLE**
 
-#### Devops deploys:
+#### Dev-ops deploys:
 Release pipeline for NLE
 https://dev.azure.com/BritishLibrary-Official/BL%20Web/_release?_a=releases&view=mine&definitionId=3
 https://fde-app-dev-uks-webfproj-web-105-is-staging-csd0fbhdgwa4d5bw.a01.azurefd.net/version
