@@ -2,7 +2,7 @@
 
 ## Minimatch Fix
 
-The minimatch vulnerability has been successfully resolved by allowing the dependency tree to re-resolve cleanly, removing the vulnerable path and avoiding the need for forced overrides.
+The minimatch vulnerability has been successfully resolved by allowing the dependency tree to re-resolve cleanly, This was achieved by removing the existing install state and letting npm rebuild the entire dependency graph from scratch using standard semver rules, rather than forcing specific versions.
 
 ### Evidence
 
