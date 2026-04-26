@@ -125,6 +125,17 @@ Principle:
 
 ---
 
+---
+
+## 8. Validation
+
+- `npm audit` no longer reports the minimatch advisory
+- `npm ls minimatch` shows only patched versions (e.g. `9.0.9`)
+- No `overrides` were introduced in `package.json`
+- `npm run check-types`, `lint`, and `test` all pass
+
+---
+
 ## Security Fix Summary
 
 Resolved transitive `minimatch` ReDoS vulnerability by upgrading dependent Storybook packages in line with GitHub Advisory guidance and npm dependency resolution best practices, avoiding unsafe overrides and ensuring a clean, deterministic install state.
@@ -132,3 +143,13 @@ Resolved transitive `minimatch` ReDoS vulnerability by upgrading dependent Story
 Aligned all Storybook packages (`storybook`, `@storybook/react-vite`) to the same version to avoid peer conflicts.
 
 Performed full clean reinstall to remove stale `node_modules` and ensure consistent dependency resolution.
+
+
+---
+
+## 8. Validation
+
+- `npm audit` no longer reports the minimatch advisory
+- `npm ls minimatch` shows only patched versions (e.g. `9.0.9`)
+- No `overrides` were introduced in `package.json`
+- `npm run check-types`, `npm run lint`, and `npm run test` all pass
