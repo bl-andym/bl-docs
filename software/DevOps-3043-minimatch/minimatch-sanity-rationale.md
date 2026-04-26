@@ -2,7 +2,7 @@
 
 ### Minimatch / Security Fix
 
-- - Addressed the `minimatch` ReDoS vulnerability by allowing the dependency tree to re-resolve cleanly. This was achieved by removing the existing install state and letting npm rebuild the entire dependency graph from scratch using standard semver rules, rather than forcing specific versions.
+- Addressed the `minimatch` ReDoS vulnerability by allowing the dependency tree to re-resolve cleanly. This was achieved by removing the existing install state and letting npm rebuild the entire dependency graph from scratch using standard semver rules, rather than forcing specific versions.
 - Avoided forcing a root `overrides` fix, reducing the risk of breaking packages that rely on different `minimatch` major versions.
 - Updated and aligned Storybook packages (`storybook`, `@storybook/react-vite`) to `10.3.5`, which removed the vulnerable transitive `minimatch@9.0.6` path.
 - Verified the vulnerable `minimatch@9.0.6` path was removed and replaced by patched versions such as `minimatch@9.0.9`.
