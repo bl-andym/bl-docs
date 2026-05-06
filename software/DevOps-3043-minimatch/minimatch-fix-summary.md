@@ -89,7 +89,7 @@ Justifies:
 
 ## 6. Avoiding overrides as first approach
 
-### npm overrides (official)
+### npm overrides
 - https://docs.npmjs.com/cli/v10/configuring-npm/package-json#overrides
 
 Guidance:

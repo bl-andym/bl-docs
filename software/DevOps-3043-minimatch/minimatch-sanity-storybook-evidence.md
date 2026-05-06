@@ -5,7 +5,6 @@
 The minimatch vulnerability has been successfully resolved by allowing the dependency tree to re-resolve cleanly, This was achieved by removing the existing install state and letting npm rebuild the entire dependency graph from scratch using standard semver rules, rather than forcing specific versions.
 
 ### Evidence
-
 - `npm ls minimatch` previously showed `minimatch@9.0.6` via the Storybook / glob chain.
 - After dependency alignment and reinstall, `npm ls minimatch` shows patched versions such as `minimatch@9.0.9`.
 - `npm audit` no longer reports the original minimatch advisory.
