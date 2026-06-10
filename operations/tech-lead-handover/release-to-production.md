@@ -49,14 +49,14 @@ In **GitHub → Actions**:
 
 Options to check:
 
-- [check] Deploy web app  
-- [check] Deploy Sanity Studio  
-- [check] Deploy Storybook  
+- Deploy web app  
+- Deploy Sanity Studio  
+- Deploy Storybook  
 
 Then:
 
-- [click] Run workflow  
-- [wait] Let `deploy-production.yml` run its course  
+- click Run workflow  
+- wait... Let `deploy-production.yml` run its course  
 
 ---
 
@@ -71,7 +71,7 @@ In DevOps:
 - Under **Search all pipelines**, select the folder icon  
 - In **All pipelines** → **BL Web Foundations folder** → **Release Production**
 
-[wait] When ready, the new release iteration is listed at the top:
+wait... when ready, the new release iteration is listed at the top:
 
 - Example: `Release 26` *(vid: 22:52 / 46:56)*  
 - Status shows **Deploy to…** with spinning icon  
@@ -103,9 +103,9 @@ In **GitHub → Releases**:
 - Select **Draft a new release**  
 - Select tag → create a new tag (e.g. `v3.0.0`) → confirm  
 - Target → `main`  
-- [click] Generate release notes (auto process from commit messages)  
-- [check] Set as the latest release  
-- [click] Publish release  
+- click Generate release notes (auto process from commit messages)  
+- check Set as the latest release  
+- click Publish release  
 
 ---
 
@@ -136,7 +136,7 @@ Configure:
 - Add labels (`no-release-notes`)  
 - Add description  
 
-[wait] GitHub Actions → checks run automatically  
+wait... GitHub Actions → checks run automatically  
 
 ---
 
