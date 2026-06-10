@@ -8,8 +8,8 @@ The goal is simple: **nothing that can grant access to external systems belongs 
 
 Instead of storing database credentials, API keys, or tokens in the project tree, the app references them indirectly. The repository holds only:
 
-- **Public configuration** — values safe to share or rebuild from documentation (for example, API route paths exposed to the browser).
-- **A pointer** — an environment variable that tells server-side code where to load real secrets from at runtime.
+- **Public configuration**: values safe to share or rebuild from documentation (for example, API route paths exposed to the browser).
+- **A pointer**: an environment variable that tells server-side code where to load real secrets from at runtime.
 
 Secrets themselves sit in an **external secrets file** (local development) or are **injected by the host environment** (CI, staging, production).
 
@@ -48,7 +48,7 @@ Use names that describe **role**, not implementation detail:
 
 In this codebase the pointer is `EXTERNAL_ENV_FILE` and the primary secret is `MONGODB_URI`. The names differ slightly from the generic table above, but the roles are the same: one variable points to the file, one holds the credential.
 
-The `NEXT_PUBLIC_` prefix is not decorative naming — it defines a **trust boundary** between server runtime and client bundle. The rules below follow from that boundary.
+The `NEXT_PUBLIC_` prefix is not decorative naming it defines a **trust boundary** between server runtime and client bundle. The rules below follow from that boundary.
 
 ### Rules
 
@@ -58,7 +58,7 @@ In Next.js, environment variables are **server-only by default**. Anything witho
 
 Adding `NEXT_PUBLIC_` tells Next.js: **this value is safe to embed in client-side JavaScript**. At build time, Next.js replaces `process.env.NEXT_PUBLIC_*` with the literal string in code that ships to the browser.
 
-In this project, `NEXT_PUBLIC_API_URL` is the correct use: the client page needs to know *where* to call the API (for example `/api/data`). That is configuration, not a credential — anyone can see that URL in DevTools once the app runs.
+In this project, `NEXT_PUBLIC_API_URL` is the correct use: the client page needs to know *where* to call the API (for example `/api/data`). That is configuration, not a credential anyone can see that URL in DevTools once the app runs.
 
 Use `NEXT_PUBLIC_` when:
 
@@ -68,11 +68,11 @@ Use `NEXT_PUBLIC_` when:
 Do not use it when:
 
 - Only server code needs the value (database URIs, signing keys, admin tokens)
-- You are unsure whether it is secret — default to **no prefix**
+- You are unsure whether it is secret; default to **no prefix**
 
 #### 2. Never prefix secrets with `NEXT_PUBLIC_`
 
-This is the most important rule, because the prefix is not a hint — it is a **deliberate exposure mechanism**.
+This is the most important rule, because the prefix is not a hint; it is a **deliberate exposure mechanism**.
 
 If a secret were named `NEXT_PUBLIC_DATABASE_CONNECTION_STRING`, Next.js would **inline that string into the JavaScript sent to every visitor**. Consequences include:
 
@@ -96,12 +96,12 @@ A common mistake is treating `NEXT_PUBLIC_` as “this env var is for the fronte
 
 #### 3. Keep the project `.env` limited to public config and the secrets file path
 
-The project `.env` should answer: *“How does this app find its configuration?”* — not *“What are the credentials?”*
+The project `.env` should answer: *“How does this app find its configuration?”* not *“What are the credentials?”*
 
 **Belongs in project `.env`:**
 
 - `NEXT_PUBLIC_*` values (public by definition)
-- `EXTERNAL_SECRETS_FILE` (or equivalent) — a **pointer**, not a secret itself
+- `EXTERNAL_SECRETS_FILE` (or equivalent) a **pointer**, not a secret itself
 
 **Belongs in the external secrets file (or deployment platform):**
 
@@ -110,8 +110,8 @@ The project `.env` should answer: *“How does this app find its configuration?�
 
 This keeps two failure modes smaller:
 
-1. **Accidental commit** — if `.env` slips into git, you leak a path, not credentials.
-2. **Wrong layer** — developers see clearly where public config ends and secrets begin.
+1. **Accidental commit**: if `.env` slips into git, you leak a path, not credentials.
+2. **Wrong layer**: developers see clearly where public config ends and secrets begin.
 
 The pointer variable is intentionally low sensitivity: knowing *that* secrets live at `~/secrets/<app-name>/secrets.env` does not grant access unless someone also has filesystem access on that machine. The credential itself remains in the external file with stricter access control.
 
@@ -148,8 +148,8 @@ The pointer variable is intentionally low sensitivity: knowing *that* secrets li
 
 The API route loads configuration in order:
 
-1. Project `.env` — public settings and the secrets file pointer.
-2. External file — credentials referenced by the pointer.
+1. Project `.env`: public settings and the secrets file pointer.
+2. External file: credentials referenced by the pointer.
 
 If the pointer is set but the file is missing, the app fails immediately with a clear error rather than running without credentials.
 
@@ -171,11 +171,11 @@ Sensitive values are read only in server-side code (`app/api/**`). The client pa
 
 ## Good practices demonstrated
 
-1. **Defence in depth** — gitignore plus physical separation means a mistaken `git add` is less likely to expose credentials.
-2. **Least exposure** — secrets never reach the browser bundle or client components.
-3. **Explicit configuration** — required variables are validated; missing secrets produce errors, not silent defaults to production systems.
-4. **Portable concept** — the same code path accepts secrets from an external file locally or from injected environment variables in deployment (set `DATABASE_CONNECTION_STRING` directly and omit the file pointer).
-5. **Documented contract** — this file describes what each layer holds so new contributors know where to put values without hunting through code.
+1. **Defence in depth**: gitignore plus physical separation means a mistaken `git add` is less likely to expose credentials.
+2. **Least exposure**: secrets never reach the browser bundle or client components.
+3. **Explicit configuration**: required variables are validated; missing secrets produce errors, not silent defaults to production systems.
+4. **Portable concept**: the same code path accepts secrets from an external file locally or from injected environment variables in deployment (set `DATABASE_CONNECTION_STRING` directly and omit the file pointer).
+5. **Documented contract**: this file describes what each layer holds so new contributors know where to put values without hunting through code.
 
 ## Deployment note
 
