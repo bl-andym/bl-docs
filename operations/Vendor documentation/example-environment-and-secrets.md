@@ -40,19 +40,80 @@ This pattern scales by changing *how* secrets are delivered, not *whether* they 
 
 Use names that describe **role**, not implementation detail:
 
-| Variable                    | Layer    | Purpose                                              |
-|-----------------------------|----------|------------------------------------------------------|
-| `EXTERNAL_SECRETS_FILE`     | Pointer  | Absolute or home-relative path to the secrets file   |
-| `DATABASE_CONNECTION_STRING`| Secret   | Credential for the primary data store                |
-| `NEXT_PUBLIC_*`             | Public   | Values compiled into the client bundle (never secrets)|
+| Variable                     | Layer   | `NEXT_PUBLIC_`? | Purpose                                               |
+|------------------------------|---------|-----------------|-------------------------------------------------------|
+| `NEXT_PUBLIC_API_URL`        | Public  | Yes             | API path the browser needs to call (not a credential) |
+| `EXTERNAL_SECRETS_FILE`      | Pointer | No              | Absolute or home-relative path to the secrets file    |
+| `DATABASE_CONNECTION_STRING` | Secret  | **Never**       | Credential for the primary data store                 |
 
 In this codebase the pointer is `EXTERNAL_ENV_FILE` and the primary secret is `MONGODB_URI`. The names differ slightly from the generic table above, but the roles are the same: one variable points to the file, one holds the credential.
 
-**Rules:**
+The `NEXT_PUBLIC_` prefix is not decorative naming — it defines a **trust boundary** between server runtime and client bundle. The rules below follow from that boundary.
 
-- Prefix client-visible variables with `NEXT_PUBLIC_` (Next.js convention).
-- Never prefix secrets with `NEXT_PUBLIC_`.
-- Keep the project `.env` limited to public config and the secrets file path — not the secrets themselves.
+### Rules
+
+#### 1. Prefix client-visible variables with `NEXT_PUBLIC_`
+
+In Next.js, environment variables are **server-only by default**. Anything without the `NEXT_PUBLIC_` prefix exists only in Node during build and request handling; it is not exposed to the browser bundle.
+
+Adding `NEXT_PUBLIC_` tells Next.js: **this value is safe to embed in client-side JavaScript**. At build time, Next.js replaces `process.env.NEXT_PUBLIC_*` with the literal string in code that ships to the browser.
+
+In this project, `NEXT_PUBLIC_API_URL` is the correct use: the client page needs to know *where* to call the API (for example `/api/data`). That is configuration, not a credential — anyone can see that URL in DevTools once the app runs.
+
+Use `NEXT_PUBLIC_` when:
+
+- A client component or browser code genuinely needs the value
+- The value is not sensitive (paths, feature flags, public API base URLs, analytics IDs meant for the client)
+
+Do not use it when:
+
+- Only server code needs the value (database URIs, signing keys, admin tokens)
+- You are unsure whether it is secret — default to **no prefix**
+
+#### 2. Never prefix secrets with `NEXT_PUBLIC_`
+
+This is the most important rule, because the prefix is not a hint — it is a **deliberate exposure mechanism**.
+
+If a secret were named `NEXT_PUBLIC_DATABASE_CONNECTION_STRING`, Next.js would **inline that string into the JavaScript sent to every visitor**. Consequences include:
+
+| Risk              | What happens                                                                 |
+|-------------------|------------------------------------------------------------------------------|
+| Immediate leak    | Anyone opens DevTools and reads the bundled JS                               |
+| Permanent leak    | The value is baked into static chunks; crawlers and caches can retain it     |
+| Git / CI exposure | Build logs, error reports, or source maps may echo the value                 |
+| No take-back      | Rotating the secret does not remove old bundles already deployed or cached   |
+
+There is no private mode for `NEXT_PUBLIC_`. The name means: **public by design**.
+
+That is why this project keeps `MONGODB_URI` in the external secrets file with **no** `NEXT_PUBLIC_` prefix, and loads it only in server-side API routes. The browser never receives it; it only gets JSON from the API after the server has already authenticated to the database.
+
+**Mental model:**
+
+- No prefix → server vault
+- `NEXT_PUBLIC_` → printed on a postcard mailed to every user
+
+A common mistake is treating `NEXT_PUBLIC_` as “this env var is for the frontend feature” rather than “this env var is **published to the world**.” Secrets must stay on the server side of that boundary.
+
+#### 3. Keep the project `.env` limited to public config and the secrets file path
+
+The project `.env` should answer: *“How does this app find its configuration?”* — not *“What are the credentials?”*
+
+**Belongs in project `.env`:**
+
+- `NEXT_PUBLIC_*` values (public by definition)
+- `EXTERNAL_SECRETS_FILE` (or equivalent) — a **pointer**, not a secret itself
+
+**Belongs in the external secrets file (or deployment platform):**
+
+- Database connection strings
+- API keys, tokens, private keys
+
+This keeps two failure modes smaller:
+
+1. **Accidental commit** — if `.env` slips into git, you leak a path, not credentials.
+2. **Wrong layer** — developers see clearly where public config ends and secrets begin.
+
+The pointer variable is intentionally low sensitivity: knowing *that* secrets live at `~/secrets/<app-name>/secrets.env` does not grant access unless someone also has filesystem access on that machine. The credential itself remains in the external file with stricter access control.
 
 ## Local setup
 
