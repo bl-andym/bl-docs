@@ -458,6 +458,151 @@ Inspect `package-lock.json` for all resolved Storybook versions and lockfile pat
 
 ---
 
+# sed – Stream Editor
+
+`sed` is a stream editor used to read text and print, transform, insert, replace, or delete content without opening a file in an editor.
+
+For Dependabot reviews, it is commonly used to inspect specific line ranges within large files such as `package-lock.json`.
+## Common Syntax
+
+```bash
+sed [options] '<command>' <file>
+```
+
+Example:
+
+```bash
+sed -n '29726,29735p' package-lock.json
+```
+
+Read lines 29726–29735 from `package-lock.json`. ('p' is print)
+## Common Flags
+
+### Suppress automatic output
+
+```bash
+sed -n
+```
+
+Normally `sed` prints every line it reads.
+
+`-n` suppresses automatic printing so only explicitly requested lines are shown.
+
+Without `-n`:
+
+```bash
+sed '29726,29735p' package-lock.json
+```
+
+Output:
+- Entire file
+- Plus lines 29726–29735 a second time
+
+Usually not desirable.
+### Print
+
+```bash
+p
+```
+
+Print the selected lines.
+
+Example:
+
+```bash
+sed -n '29726,29735p' package-lock.json
+```
+
+Meaning:
+
+```text
+29726,29735  -> line range
+p            -> print
+-n           -> suppress everything else
+```
+
+Result:
+Only lines 29726–29735 are displayed.
+## Dependabot Review Usage
+
+### Inspect a lockfile block
+
+```bash
+sed -n '29726,29735p' package-lock.json
+```
+
+Inspect a specific dependency block.
+
+Useful after locating a package with:
+
+```bash
+grep -n "shell-quote" package-lock.json
+```
+
+Example output:
+
+```text
+29726:    "node_modules/shell-quote": {
+```
+
+Then inspect the surrounding lines:
+
+```bash
+sed -n '29726,29735p' package-lock.json
+```
+### Inspect a parent dependency block
+
+```bash
+sed -n '35470,35490p' package-lock.json
+```
+
+Inspect the dependency that references the vulnerable package.
+
+Example:
+
+```json
+"dependencies": {
+  "shell-quote": "^1.8.4"
+}
+```
+
+This helps identify which package introduced the dependency.
+## Useful Mental Model
+
+Think of:
+
+```bash
+grep
+```
+
+as:
+
+```text
+Find the line number
+```
+
+and:
+
+```bash
+sed
+```
+
+as:
+
+```text
+Show me the surrounding content
+```
+
+A common review workflow is:
+
+```bash
+grep -n "shell-quote" package-lock.json
+sed -n '29726,29735p' package-lock.json
+```
+
+Find the dependency, then inspect the relevant section of the file.
+
+---
 # grep / findstr – Dependency Checks
 
 ### Search for undici declarations
