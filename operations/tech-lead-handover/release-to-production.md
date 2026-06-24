@@ -98,7 +98,7 @@ Once Approved is clicked we go to new Release view:
 
 ## Create Release Notes (*vid: 35:32 / 46:56*)
 
-In **GitHub → Releases**:
+In **GitHub → Releases (RHC)**:
 
 - Select **Draft a new release**  
 - Select tag → create a new tag (e.g. `v3.0.0`) → confirm  
@@ -137,6 +137,14 @@ Configure:
 - Add description  
 
 wait... GitHub Actions → checks run automatically  
+
+Once approved, **GitHub Actions** fires and kicks off testing.
+
+When tests are complete:
+
+- Click **Able to merge**  
+- Click **Merge pull request**  
+- Click **Confirm merge**
 
 ---
 
