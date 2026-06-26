@@ -1,6 +1,10 @@
-# Sanity CLI commands (layer-cake-lesson)
+# Sanity CLI commands
 
-Commands referenced while working through the **Sanity tutorials** 
+Commands for Sanity CMS CLI workflows: authentication, dataset import, document queries, and schema validation.
+
+Used with the **layer-cake-lesson** repo and Sanity tutorials. For npm dependency and Dependabot work, see [dependabot-remediation.md](./dependabot-remediation.md).
+
+See also: [CLI commands and diagnostics index](./README.md)
 
 ---
 
@@ -47,10 +51,12 @@ pnpm exec sanity projects list
 
 ---
 
-## Dataset import (course `production.tar.gz`)
+## Dataset import
+
+Course exports typically use `production.tar.gz`:
 
 ```bash
-# Import course export into the production dataset (no -y flag on import)
+# Import into the production dataset (no -y flag on import)
 pnpm dlx sanity@latest dataset import production.tar.gz --dataset production
 
 # Short form of --dataset
@@ -80,7 +86,7 @@ pnpm exec sanity documents query 'count(*[_type in ["artist","event","venue"]])'
 
 ---
 
-## Bulk validation (lesson step)
+## Bulk validation
 
 ```bash
 # Validate all documents against local Studio schema (confirms pitfalls first)
@@ -95,7 +101,7 @@ pnpm dlx sanity@latest documents validate --dataset development -y
 
 ---
 
-## Other (diagnostics / course setup)
+## Diagnostics and course setup
 
 ```bash
 # Check whether CLI auth config files exist (not a Sanity subcommand)
@@ -122,10 +128,10 @@ pnpm create sanity@latest --template clean --create-project "Day One Content Ope
 cd /path/to/layer-cake-lesson
 
 pnpm exec sanity logout && rm -rf ~/.config/sanity
-pnpm dlx sanity@latest login --provider google   # or github, for the account that owns 3tmi4ntn
+pnpm dlx sanity@latest login --provider google   # or github, for the account that owns the project
 
 pnpm exec sanity debug
-pnpm exec sanity projects list                   # should include Project ID
+pnpm exec sanity projects list                   # should include your Project ID
 
 pnpm dlx sanity@latest dataset import production.tar.gz --dataset production
 pnpm exec sanity documents query 'count(*[_type in ["artist","event","venue"]])' --dataset production
@@ -140,4 +146,4 @@ pnpm dlx sanity@latest documents validate -y
 - **User** block in `sanity debug` = CLI login identity (not controlled by `.env` comments).
 - **Studio** project/dataset in `sanity debug` = `NEXT_PUBLIC_SANITY_*` in `.env.local` + `sanity.cli.ts`.
 - CLI auth is stored at `~/.config/sanity/config.json` (not in this repo).
-- Course import targets **Day One** types (`artist`, `event`, `venue`); this repo’s schema is **Layer Caker** (`post`, `page`, etc.).
+- Course import targets **Day One** types (`artist`, `event`, `venue`); the monorepo schema is **Layer Caker** (`post`, `page`, etc.).
