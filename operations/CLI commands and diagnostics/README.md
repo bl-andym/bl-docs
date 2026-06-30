@@ -2,10 +2,10 @@
 
 Operational command references for the TurboRepo / Next.js / Sanity monorepo.
 
-| Document | Use when |
-|----------|----------|
+| Document                                                 | Use when                                                                             |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | [dependabot-remediation.md](./dependabot-remediation.md) | Reviewing Dependabot PRs, npm audit alerts, or transitive dependency vulnerabilities |
-| [sanity-cli-commands.md](./sanity-cli-commands.md) | Sanity CMS CLI: auth, dataset import, document queries, and schema validation |
+| [sanity-cli-commands](./sanity-cli-commands.md)          | Sanity CMS CLI: auth, dataset import, document queries, and schema validation        |
 
 ## Related docs elsewhere in bl-docs
 

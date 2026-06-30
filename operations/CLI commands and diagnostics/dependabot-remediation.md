@@ -2,8 +2,6 @@
 
 Workflow and command reference for reviewing dependency-security and Dependabot remediation PRs in a TurboRepo / Next.js / Sanity monorepo.
 
-See also: [CLI commands and diagnostics index](./README.md) · [Sanity CLI commands](./sanity-cli-commands.md)
-
 ---
 
 ## Workflow
