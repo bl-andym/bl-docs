@@ -440,9 +440,45 @@ git reset --hard origin/<branch-name>
 git clean -fd
 ```
 
-#### Push and CI
+# git commit --allow-empty -m "chore: trigger CI"
+
+## What it does
+
+Creates a commit with no file changes and immediately uses the supplied commit message.
 
 ```bash
-git push
 git commit --allow-empty -m "chore: trigger CI"
 ```
+
+## Why use it?
+
+- Triggering a CI/CD pipeline when no code changes are needed.
+- Testing GitHub Actions workflows.
+- Creating a marker or checkpoint in Git history.
+- Triggering deployment automation that runs on every push.
+
+## What happens?
+
+Normally Git refuses to create a commit if there are no staged changes:
+
+```text
+nothing to commit, working tree clean
+```
+
+The `--allow-empty` flag overrides this and creates a commit anyway.
+
+## Example workflow
+
+```bash
+git commit --allow-empty -m "chore: trigger CI"
+git push origin feature/my-branch
+```
+
+Pushing the commit typically causes GitHub Actions to run, just as if code had changed.
+## Safety
+
+- Does not modify files.
+- Does not rewrite history.
+- Simply adds an extra commit to the branch history.
+
+The commit message `chore: trigger CI` follows the conventional commit style, indicating a maintenance task whose purpose is to trigger the CI pipeline.
