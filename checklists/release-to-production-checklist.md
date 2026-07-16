@@ -16,8 +16,8 @@ Source: [[release-to-production]]
 - [ ] Add PR description
 - [ ] Name PR using release version (e.g. `release 3.n.n`)
 - [ ] Wait for GitHub Actions checks to complete successfully
-- [ ] Obtain approval
-- [ ] Merge PR
+- [ ] Obtain approval (btn: Awaiting approval)
+- [ ] Merge PR (btn: Able to merge )
 - [ ] Confirm merge
 
 ## Deploy to Production
@@ -34,7 +34,7 @@ Source: [[release-to-production]]
 
 ## Monitor the Production Release in DevOps
 
-- [ ] Open DevOps Release Production pipeline
+- [ ] Open DevOps Release Production pipeline (folder icon)
 - [ ] Locate the new release iteration
 - [ ] Open the new release iteration
 - [ ] Confirm **Continuous deployment** package stage exists

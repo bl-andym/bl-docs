@@ -131,7 +131,7 @@ pnpm exec sanity logout && rm -rf ~/.config/sanity
 pnpm dlx sanity@latest login --provider google   # or github, for the account that owns the project
 
 pnpm exec sanity debug
-pnpm exec sanity projects list                   # should include your Project ID
+pnpm exec sanity projects list                   # should include the Project ID
 
 pnpm dlx sanity@latest dataset import production.tar.gz --dataset production
 pnpm exec sanity documents query 'count(*[_type in ["artist","event","venue"]])' --dataset production
