@@ -16,39 +16,29 @@ confirmation until the user clicks the link in the email DotDigital sends them.
 ## Flow
 
 ```mermaid
-sequenceDiagram
-    participant U as User
-    participant C as EmailSignup (client)
-    participant API as POST /api/email-signup
-    participant FC as Friendly Captcha
-    participant DD as DotDigital
+flowchart TD
 
-    U->>C: Type firstName + email, solve captcha
-    C->>C: Client validation + captcha gate<br/>(button disabled until valid)
-    C->>API: POST { email, firstName, captchaSolution }
-    API->>API: isEmailForm() shape check
-    alt invalid shape
-        API-->>C: 400 { error: "Missing or incorrect parameters" }
-    end
-    API->>FC: verifyCaptcha(captchaSolution)
-    alt captcha bad / unverifiable / throws
-        API-->>C: 400 { error: "Failed captcha" }
-    end
-    API->>DD: createNewContact(email, firstName)
-    DD-->>API: { status }
-    API-->>C: 200 / 400 { status }
-    C->>U: Success text, "already signed up", or generic error
+    User[User]
+    EmailSignup["Email Signup"]
+    API["POST /api/email-signup"]
+    Captcha["Friendly Captcha"]
+    DotDigital["DotDigital"]
+
+    User --> EmailSignup
+    EmailSignup <--> API
+    API --> Captcha
+    API --> DotDigital
 ```
 
 ## Components and responsibilities
 
-| File | Responsibility |
-| --- | --- |
-| `EmailSignup/index.tsx` | Renders the form, validates input client-side, gates submit on captcha, POSTs to the API, maps the response to a success/error message. |
-| `route.ts` | Validates request shape, verifies the captcha server-side, calls DotDigital, maps the provider status to an HTTP status. |
-| `email-signup.ts` | `EmailForm` type + `isEmailForm` guard, and the shared endpoint config (`defaultEmailForm`). |
-| `dot-digital.ts` | Builds the DotDigital contact payload and calls the DotDigital API. |
-| `ContentBlockRenderer.tsx` | Supplies the `emailSignup` CMS block with `defaultEmailForm` and `clientConfig.captcha`. |
+| File                       | Responsibility                                                                                                                          |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `EmailSignup/index.tsx`    | Renders the form, validates input client-side, gates submit on captcha, POSTs to the API, maps the response to a success/error message. |
+| `route.ts`                 | Validates request shape, verifies the captcha server-side, calls DotDigital, maps the provider status to an HTTP status.                |
+| `email-signup.ts`          | `EmailForm` type + `isEmailForm` guard, and the shared endpoint config (`defaultEmailForm`).                                            |
+| `dot-digital.ts`           | Builds the DotDigital contact payload and calls the DotDigital API.                                                                     |
+| `ContentBlockRenderer.tsx` | Supplies the `emailSignup` CMS block with `defaultEmailForm` and `clientConfig.captcha`.                                                |
 
 ## Configuration and secrets
 
@@ -69,15 +59,15 @@ DotDigital returns a `status` (or an `errorCode` on failure, which the client
 maps to `status`). The route buckets it into an HTTP status; the client turns
 that into a user-facing message.
 
-| DotDigital status | HTTP (route) | UI result |
-| --- | --- | --- |
-| `subscribed` | 200 | Success text shown |
-| `pendingOptIn` | 200 | Success text shown |
-| `noSubscription` | 200 | Success text shown (treated as pending/benign) |
-| `contacts:identifierConflict` | 400 | "Already signed up" error text |
-| any other status | 400 | Generic error text |
-| shape check fails | 400 | Generic error text |
-| captcha fails | 400 | Generic error text (captcha widget also surfaces its own errors) |
+| DotDigital status             | HTTP (route) | UI result                                                        |
+| ----------------------------- | ------------ | ---------------------------------------------------------------- |
+| `subscribed`                  | 200          | Success text shown                                               |
+| `pendingOptIn`                | 200          | Success text shown                                               |
+| `noSubscription`              | 200          | Success text shown (treated as pending/benign)                   |
+| `contacts:identifierConflict` | 400          | "Already signed up" error text                                   |
+| any other status              | 400          | Generic error text                                               |
+| shape check fails             | 400          | Generic error text                                               |
+| captcha fails                 | 400          | Generic error text (captcha widget also surfaces its own errors) |
 
 ## External dependencies
 

@@ -1,6 +1,11 @@
-# File: `design-systems/src/molecules/emailSignup/index`
+# File: `design-systems/src/internal/captcha/index`
+
+## Objective:
+
+Enhance the email signup flow to correctly handle single-use FriendlyCaptcha tokens by exposing a reset API from the FriendlyCaptcha component and resetting the widget whenever a submission fails.
 
 ## ✅ Replaced FC with forwardRef
+
 
 **Replaced:**
 
@@ -26,6 +31,14 @@ The component needs to expose a `reset()` method to its parent.
 Functional components (`FC`) cannot receive refs by default, whereas
 `forwardRef` allows the parent component to access an explicitly defined
 imperative API.
+
+> **In React, _imperative_ means:**
+>
+> > **"Do this now."**
+>
+> as opposed to **declarative**, which means:
+>
+> > **"Describe what you want, and React decides how to do it."**
 
 **Previous functionality restriction:**
 
