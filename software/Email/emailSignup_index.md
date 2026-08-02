@@ -88,15 +88,15 @@ The component could render the captcha widget but had no typed mechanism for int
 **Added:**
 
 ```ts
-
 /*
  * `useRef<
- *   What type of value will be stored?
- *       FriendlyCaptchaHandle | null
- * >`
- * Lifecycle: 
- * → Before mounting: `null` 
+ *   Q: What type of value will be stored?
+ *   A: FriendlyCaptchaHandle | null>`
+ *
+ * Lifecycle:
+ * → Before mounting: `null` // which one?
  * → After mounting: `FriendlyCaptchaHandle`
+ * → After unmounting: `null` // which one?
  *
  * Outer generic (`useRef<...>`)
  * → "What type of value will be stored?"
@@ -104,17 +104,24 @@ The component could render the captcha widget but had no typed mechanism for int
  *
  * Union (`FriendlyCaptchaHandle | null`)
  * → Before the component is mounted, no `FriendlyCaptcha` instance
- *   exists, so the ref is initially `null`.
+ *   exists, so the ref is `null`.
  * → After mounting, the ref stores the `FriendlyCaptchaHandle`,
  *   exposing the public `reset()` method.
+ * → After the component unmounts, React clears the ref back to
+ *   `null` because the component instance no longer exists.
  *
  * `(null)`
  * → Initialises the ref before the `FriendlyCaptcha` component has
  *   been mounted.
  * → After mounting, React assigns the object exposed via
  *   `useImperativeHandle()` to `captchaWidgetRef.current`.
- * → This allows `EmailSignup` to call:
+ * → After unmounting, React automatically resets
+ *   `captchaWidgetRef.current` back to `null`.
+ * → This allows `EmailSignup` to safely call:
  *   captchaWidgetRef.current?.reset();
+ *
+ * Mental note:
+ * myRef = useRef<useThisType or useNull>(but start as null)
  */
 const captchaWidgetRef = useRef<FriendlyCaptchaHandle | null>(null);
 ```
@@ -166,7 +173,7 @@ No reference to the `FriendlyCaptcha` component was retained after rendering, pr
 const resetCaptcha = useCallback(() => {
   setCaptchaSolution(undefined);
   captchaWidgetRef.current?.reset();
-}, []); // No changing dependencies, so React reuses the same function reference.
+}, []); // Empty dependency array: React reuses the same function reference.
 ```
 
 **Rationale:**
