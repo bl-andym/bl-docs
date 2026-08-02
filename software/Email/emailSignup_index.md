@@ -1,191 +1,491 @@
-# File: `design-systems/src/molecules/emailSignup/index`
+# File: `packages/design-system/src/molecules/EmailSignup/index.tsx`
 
 ## Objective:
 
-Enhance the email signup flow to correctly handle single-use FriendlyCaptcha tokens by exposing a reset API from the FriendlyCaptcha component and resetting the widget whenever a submission fails.
+Enhance the email signup flow to correctly handle single-use FriendlyCaptcha tokens by invoking the `FriendlyCaptcha` reset API and clearing the stored captcha solution whenever a submission fails, the captcha expires, or the widget reports an error.
 
-## ✅ Replaced FC with forwardRef
+---
+## Change index:
+
+- Imported `FriendlyCaptchaHandle`
+- Added `captchaWidgetRef`
+- Added `resetCaptcha`
+- Reset the captcha after unsuccessful submissions
+- Added `resetCaptcha` to the dependency array
+- Cleared the stored captcha solution on widget errors
+- Cleared the stored captcha solution when the captcha expired
+- Passed the forwarded ref to `FriendlyCaptchaWidget`
+
+---
+
+**Note**: Code comments only appear in this documentation and not in the source code.
+
+## ✅ Imported `FriendlyCaptchaHandle`
 
 **Replaced:**
 
-``` ts
-import type { FC } from 'react';
-import { useEffect, useRef } from 'react';
-
-const FriendlyCaptcha: FC<Props> = (...) => {
+```ts
+import FriendlyCaptchaWidget from '../../internal/Captcha';
 ```
 
 **With:**
 
-``` ts
-import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
-
-const FriendlyCaptcha = forwardRef<FriendlyCaptchaHandle, Props>(
-  (...) => {
+```ts
+/*
+ * `type FriendlyCaptchaHandle`
+ * → Imports the `FriendlyCaptchaHandle` type exported by the
+ *   `FriendlyCaptcha` component.
+ *
+ * `type`
+ * → Indicates that this is a TypeScript type-only import.
+ * → The type is used for compile-time type checking only and is
+ *   removed from the compiled JavaScript.
+ *
+ * `FriendlyCaptchaHandle`
+ * → Describes the public API exposed by the `FriendlyCaptcha`
+ *   component via `useImperativeHandle()`.
+ * → Allows TypeScript to recognise that the component reference
+ *   exposes a `reset()` method.
+ */
+import FriendlyCaptchaWidget, {
+  type FriendlyCaptchaHandle,
+} from '../../internal/Captcha';
 ```
 
 **Rationale:**
 
-The component needs to expose a `reset()` method to its parent. Functional components (`FC`) cannot receive refs by default, whereas `forwardRef` allows the parent component to access an explicitly defined imperative API. An imperative API exposes methods that another component can call directly
+The `EmailSignup` component needs the `FriendlyCaptchaHandle` type so it can create a strongly typed ref to the `FriendlyCaptcha` component and invoke its exposed `reset()` method. A less specific or untyped ref would not enforce the component's intended public API or catch incorrect method calls during development.
+
+**With an untyped ref:**
+```ts
+const captchaWidgetRef = useRef<any>(null);
+
+captchaWidgetRef.current?.reset();    // ✓
+captchaWidgetRef.current?.destroy();  // ✓
+captchaWidgetRef.current?.refresh();  // ✓
+captchaWidgetRef.current?.banana();   // ✓
+// TypeScript allows all of these because `any` disables type checking.
+```
+
+**With a strongly typed ref:**
+```ts
+const captchaWidgetRef = useRef<FriendlyCaptchaHandle | null>(null);
+
+captchaWidgetRef.current?.reset();    // ✓
+captchaWidgetRef.current?.destroy();  // ❌ Compile error
+captchaWidgetRef.current?.refresh();  // ❌ Compile error
+captchaWidgetRef.current?.banana();   // ❌ Compile error
+```
 
 **Previous functionality restriction:**
 
-The component was declared as an `FC`, so the parent `EmailSignup` component had no mechanism to access or invoke methods on the `FriendlyCaptcha` component.
+The component could render the captcha widget but had no typed mechanism for interacting with its exposed API.
 
-------------------------------------------------------------------------
+---
 
-## ✅ Added the exported `FriendlyCaptchaHandle` type exposing `reset()`
+## ✅ Added `captchaWidgetRef`
 
 **Added:**
 
-``` ts
-export type FriendlyCaptchaHandle = {
-  reset: () => void;
-};
+```ts
+
+/*
+ * `useRef<
+ *   What type of value will be stored?
+ *       FriendlyCaptchaHandle | null
+ * >`
+ * Lifecycle: 
+ * → Before mounting: `null` 
+ * → After mounting: `FriendlyCaptchaHandle`
+ *
+ * Outer generic (`useRef<...>`)
+ * → "What type of value will be stored?"
+ * → A reference to the `FriendlyCaptcha` component, or `null`.
+ *
+ * Union (`FriendlyCaptchaHandle | null`)
+ * → Before the component is mounted, no `FriendlyCaptcha` instance
+ *   exists, so the ref is initially `null`.
+ * → After mounting, the ref stores the `FriendlyCaptchaHandle`,
+ *   exposing the public `reset()` method.
+ *
+ * `(null)`
+ * → Initialises the ref before the `FriendlyCaptcha` component has
+ *   been mounted.
+ * → After mounting, React assigns the object exposed via
+ *   `useImperativeHandle()` to `captchaWidgetRef.current`.
+ * → This allows `EmailSignup` to call:
+ *   captchaWidgetRef.current?.reset();
+ */
+const captchaWidgetRef = useRef<FriendlyCaptchaHandle | null>(null);
 ```
 
 **Rationale:**
 
-The parent `EmailSignup` component needs a controlled way to reset the FriendlyCaptcha widget after a failed submission. Exposing a minimal interface containing only `reset()` allows the parent to invoke the reset operation without exposing the underlying SDK widget or its full
-API.
+The ref stores a reference to the `FriendlyCaptcha` component, allowing `EmailSignup` to invoke its exposed `reset()` method whenever the captcha must be regenerated.
 
 **Previous functionality restriction:**
 
-No public interface existed, so the parent component had no supported mechanism to reset the widget after a failed submission.
+No reference to the `FriendlyCaptcha` component was retained after rendering, preventing the component from resetting the widget programmatically.
 
-------------------------------------------------------------------------
+---
 
-## ✅ Added `widgetRef` to retain the `createWidget()` handle
+## ✅ Added `resetCaptcha()`
 
 **Added:**
 
-``` ts
-const widgetRef = useRef<
-  ReturnType<FriendlyCaptchaSDK['createWidget']> | null
->(null);
+```ts
+/*
+ * `useCallback(() => { ... }, [])`
+ * → Creates a memoised function whose reference remains stable
+ *   between component re-renders.
+ *
+ * First argument (`() => { ... }`)
+ * → The callback function that will be executed when
+ *   `resetCaptcha()` is invoked.
+ *
+ * `setCaptchaSolution(undefined)`
+ * → Clears the stored FriendlyCaptcha response token.
+ * → Prevents a previously issued single-use token from being
+ *   reused after a failed submission, widget error, or expiry.
+ *
+ * `captchaWidgetRef.current?.reset()`
+ * → Invokes the `reset()` method exposed by the `FriendlyCaptcha`
+ *   component, if the component has been mounted.
+ * → Generates a new FriendlyCaptcha challenge for the next
+ *   submission attempt.
+ *
+ * Optional chaining (`?.`)
+ * → Prevents `reset()` from being called when
+ *   `captchaWidgetRef.current` is `null`, avoiding a runtime error.
+ *
+ * Second argument (`[]`)
+ * → An empty dependency array.
+ * → The callback is created during the initial render and the same 
+ * function reference is reused on subsequent renders.
+ */
+const resetCaptcha = useCallback(() => {
+  setCaptchaSolution(undefined);
+  captchaWidgetRef.current?.reset();
+}, []); // No changing dependencies, so React reuses the same function reference.
 ```
 
 **Rationale:**
 
-The FriendlyCaptcha SDK returns a widget instance from `createWidget()`. Retaining a reference to this instance enables later calls to `reset()` and `destroy()` after the widget has been created.
+Centralising the reset behaviour into a single helper ensures every failure path consistently clears the stored captcha solution and regenerates the FriendlyCaptcha challenge.
 
 **Previous functionality restriction:**
 
-The widget instance was only available as a local variable within `useEffect()`, making it inaccessible once widget creation had completed.
+Each failure path required its own reset logic, increasing the risk that the captcha solution or widget state would become inconsistent.
 
-------------------------------------------------------------------------
+---
 
-## ✅ Used `ReturnType<FriendlyCaptchaSDK['createWidget']>` instead of importing the non-exported `WidgetHandle`
+## ✅ Reset the captcha after unsuccessful submissions
+
+**Updated:**
+
+```ts
+/*
+ * `if (code === 'contacts:identifierConflict')`
+ * → Detects the Dotdigital response indicating that the submitted
+ *   email address is already registered.
+ *
+ * `setError(alreadySignedUpErrorText)`
+ * → Displays the configured "already signed up" message to the user.
+ *
+ * `resetCaptcha()`
+ * → Clears the stored FriendlyCaptcha solution and resets the widget.
+ * → Ensures the next submission uses a new captcha solution rather
+ *   than attempting to reuse the previous single-use token.
+ *
+ * `return`
+ * → Stops further execution because the error has been handled.
+ */
+if (code === 'contacts:identifierConflict') {
+  setError(alreadySignedUpErrorText);
+  resetCaptcha();
+  return;
+}
+
+/*
+ * `setError(genericErrorText)`
+ * → Displays a generic error message for all other unsuccessful
+ *   server responses.
+ *
+ * `resetCaptcha()`
+ * → Clears the stored FriendlyCaptcha solution and resets the widget.
+ * → Ensures the next submission uses a new captcha solution.
+ *
+ * `return`
+ * → Stops further execution because the error has been handled.
+ */
+setError(genericErrorText);
+resetCaptcha();
+return;
+```
+
+and
+
+```ts
+/*
+ * `catch`
+ * → Executes when an exception occurs while parsing the server
+ *   response or processing the unsuccessful submission.
+ *
+ * `setError(genericErrorText)`
+ * → Displays a generic error message to the user.
+ *
+ * `resetCaptcha()`
+ * → Clears the stored FriendlyCaptcha solution and resets the widget.
+ * → Ensures the next submission uses a new captcha solution.
+ *
+ * `return`
+ * → Stops further execution because the exception has been handled.
+ */
+catch {
+  setError(genericErrorText);
+  resetCaptcha();
+  return;
+}
+```
+
+and
+
+```ts
+/*
+ * `catch`
+ * → Executes when an exception occurs during the submission process,
+ *   such as a network or unexpected runtime error.
+ *
+ * `setError(genericErrorText)`
+ * → Displays a generic error message to the user.
+ *
+ * `setSucces(false)`
+ * → Marks the submission as unsuccessful, ensuring the success state
+ *   is not displayed.
+ *
+ * `resetCaptcha()`
+ * → Clears the stored FriendlyCaptcha solution and resets the widget.
+ * → Ensures the next submission uses a new captcha solution.
+ */
+catch {
+  setError(genericErrorText);
+  setSucces(false);
+  resetCaptcha();
+}
+```
+
+**Rationale:**
+
+FriendlyCaptcha response tokens are single use. After any unsuccessful submission, the existing token is no longer valid, so the widget must be reset to generate a new challenge before the user can submit the form again.
+
+**Previous functionality restriction:**
+
+After a failed submission, the previously solved captcha remained active even though its response token could no longer be reused, preventing successful resubmission.
+
+---
+
+## ✅ Added `resetCaptcha` to the dependency array
 
 **Replaced:**
 
-``` ts
-import type { WidgetHandle } from '@friendlycaptcha/sdk';
-
-const widgetRef = useRef<WidgetHandle | null>(null);
+```ts
+}, [form, formValues, captchaSolution, genericErrorText, alreadySignedUpErrorText]);
 ```
 
 **With:**
 
-``` ts
-const widgetRef = useRef<
-  ReturnType<FriendlyCaptchaSDK['createWidget']> | null
->(null);
+```ts
+/*
+ * Dependency array (`[ ... ]`)
+ * → Lists every value referenced inside the callback that may change
+ *   between component re-renders.
+ *
+ * `form`
+ * → Recreates the callback if the form instance changes.
+ *
+ * `formValues`
+ * → Recreates the callback if the current form values change.
+ *
+ * `captchaSolution`
+ * → Recreates the callback if the stored FriendlyCaptcha solution
+ *   changes.
+ *
+ * `genericErrorText`
+ * → Recreates the callback if the configured generic error message
+ *   changes.
+ *
+ * `alreadySignedUpErrorText`
+ * → Recreates the callback if the configured "already signed up"
+ *   message changes.
+ *
+ * `resetCaptcha`
+ * → Recreates the callback if the `resetCaptcha` function reference
+ *   changes.
+ * → Since `resetCaptcha` is memoised with `useCallback(..., [])`,
+ *   its function reference remains stable across component re-renders.
+ */
+}, [
+  form,
+  formValues,
+  captchaSolution,
+  genericErrorText,
+  alreadySignedUpErrorText,
+  resetCaptcha,
+]);
 ```
 
 **Rationale:**
 
-Infer the correct widget type directly from the SDK's public `createWidget()` method, avoiding reliance on SDK implementation details.
+Including `resetCaptcha` satisfies the React Hooks dependency rules and ensures the callback always references the current implementation.
 
 **Previous functionality restriction:**
 
-`WidgetHandle` is not exported by `@friendlycaptcha/sdk`, so attempting to import it resulted in a TypeScript compilation error.
+The callback referenced `resetCaptcha` without declaring it as a dependency.
 
-------------------------------------------------------------------------
+---
 
-## ✅ Exposed `reset()` via `useImperativeHandle()`
+## ✅ Cleared the stored captcha solution on widget errors
 
-**Added:**
+**Updated:**
 
-``` ts
-useImperativeHandle(ref, () => ({
-  reset: () => {
-    widgetRef.current?.reset();
-  },
-}));
+```ts
+/*
+ * `useCallback((error: WidgetErrorData) => { ... }, [])`
+ * → Creates a memoised callback whose reference remains stable
+ *   between component re-renders.
+ *
+ * First argument (`(error: WidgetErrorData) => { ... }`)
+ * → The callback function executed when the `FriendlyCaptcha`
+ *   widget reports an error.
+ *
+ * `error: WidgetErrorData`
+ * → The error information supplied by the `FriendlyCaptcha` widget.
+ * → Provides details about the failure, including the error message.
+ *
+ * `setError(error.detail)`
+ * → Displays the error message provided by the `FriendlyCaptcha`
+ *   widget to the user.
+ *
+ * `setCaptchaSolution(undefined)`
+ * → Clears the stored FriendlyCaptcha response token.
+ * → Prevents an invalid or incomplete captcha solution from being
+ *   reused after a widget error.
+ *
+ * Second argument (`[]`)
+ * → An empty dependency array.
+ * → The callback is created during the initial render and the same
+ *   function reference is reused on subsequent renders.
+ */
+const onCaptchaError = useCallback((error: WidgetErrorData) => {
+  setError(error.detail);
+  setCaptchaSolution(undefined);
+}, []);
 ```
 
 **Rationale:**
 
-`useImperativeHandle()` defines the public API exposed through the forwarded ref. Rather than exposing the entire FriendlyCaptcha widget, it limits access to the single operation required by the parent component: resetting the widget after a failed submission.
+If the captcha widget reports an error, the stored solution is no longer valid and should be discarded.
 
 **Previous functionality restriction:**
 
-Although a forwarded ref could be introduced, no functionality was exposed through it, leaving the parent component unable to invoke a widget reset.
+An invalid captcha solution could remain stored after a widget error.
 
-------------------------------------------------------------------------
+---
 
-## ✅ Stored the widget instance returned by `createWidget()`
+## ✅ Cleared the stored captcha solution when the captcha expired
 
-**Added:**
+**Updated:**
 
-``` ts
-const captcha = sdk.createWidget({
+```ts
+/*
+ * `useCallback(() => { ... }, [])`
+ * → Creates a memoised callback whose reference remains stable
+ *   between component re-renders.
+ *
+ * First argument (`() => { ... }`)
+ * → The callback function executed when the `FriendlyCaptcha`
+ *   widget reports that the current captcha has expired.
+ *
+ * `setError('Captcha expired')`
+ * → Displays a message informing the user that the current captcha
+ *   challenge has expired.
+ *
+ * `setCaptchaSolution(undefined)`
+ * → Clears the stored FriendlyCaptcha response token.
+ * → Prevents an expired single-use captcha solution from being
+ *   reused on the next submission attempt.
+ *
+ * Second argument (`[]`)
+ * → An empty dependency array.
+ * → The callback is created during the initial render and the same
+ *   function reference is reused on subsequent renders.
+ */
+const onCaptchaExpire = useCallback(() => {
+  setError('Captcha expired');
+  setCaptchaSolution(undefined);
+}, []);
+```
+
+### FriendlyCaptcha token flow
+
+```text
+1. User completes the captcha
+  ↓
+2. FriendlyCaptcha generates a unique response token
+  ↓
+3. The application stores the token in `captchaSolution`
+  ↓
+4. The token is sent to the server when the form is submitted
+  ↓
+5. The server asks FriendlyCaptcha:
+   "Is this token valid?"
+  ↓
+6. FriendlyCaptcha confirms whether the token is valid
+```
+
+**Rationale:**
+
+Once the captcha expires, its response token is no longer valid. Clearing the stored solution prevents the expired token from being reused in a subsequent submission.
+
+**Previous functionality restriction:**
+
+An expired captcha solution could remain stored after the widget expired.
+
+---
+
+## ✅ Passed the forwarded ref to `FriendlyCaptchaWidget`
+
+**Updated:**
+
+```ts
+/*
+ * `<FriendlyCaptchaWidget`
+ * → Renders the `FriendlyCaptcha` component responsible for
+ *   displaying and managing the captcha widget.
+ *
+ * `ref={captchaWidgetRef}`
+ * → Passes the component reference created by `useRef()` to the
+ *   `FriendlyCaptcha` component.
+ * → React assigns the object exposed via `useImperativeHandle()`
+ *   to `captchaWidgetRef.current` once the component is mounted.
+ * → Allows the parent component to invoke the public `reset()`
+ *   method exposed by the `FriendlyCaptcha` component.
+ *
+ * `sitekey={captcha.siteKey}`
+ * → Passes the FriendlyCaptcha site key used to initialise the
+ *   captcha widget.
+ */
+<FriendlyCaptchaWidget
+  ref={captchaWidgetRef}
+  sitekey={captcha.siteKey}
   ...
-});
-
-widgetRef.current = captcha;
+/>
 ```
 
 **Rationale:**
 
-Persisting the widget instance allows subsequent interactions with the same widget, including calling `reset()` after failed submissions and `destroy()` during component cleanup.
+Passing the ref connects `EmailSignup` to the imperative API exposed by `FriendlyCaptcha`, allowing the component to invoke `reset()` when required.
 
 **Previous functionality restriction:**
 
-The widget instance was discarded after creation and therefore could not be referenced outside the initial `useEffect()` execution.
-
-------------------------------------------------------------------------
-
-## ✅ Updated cleanup to destroy the widget and clear the reference
-
-**Replaced:**
-
-``` ts
-return () => captcha?.destroy();
-```
-
-**With:**
-
-``` ts
-return () => {
-  widgetRef.current?.destroy();
-  widgetRef.current = null;
-};
-```
-
-**Rationale:**
-
-Destroying the widget removes its associated resources when the component unmounts. Clearing the stored reference ensures the component no longer retains a reference to a destroyed widget instance.
-
-**Previous functionality restriction:**
-
-The widget was destroyed during cleanup, but any persistent reference would continue to point to an invalid widget instance after destruction.
-
-------------------------------------------------------------------------
-
-## ✅ Added `FriendlyCaptcha.displayName`
-
-**Added:**
-
-``` ts
-FriendlyCaptcha.displayName = 'FriendlyCaptcha';
-```
-
-**Rationale:**
-
-Components created with `forwardRef` can appear as anonymous in React DevTools. Setting `displayName` preserves a meaningful component name, making debugging and component inspection clearer.
-
-**Previous functionality restriction:**
-
-Without a `displayName`, the component could appear as `ForwardRef` or anonymous in React DevTools, making it more difficult to identify during debugging.
+Although the `FriendlyCaptcha` component exposed a `reset()` method, `EmailSignup` did not supply a ref and therefore could not access it.
