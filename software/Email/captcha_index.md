@@ -57,13 +57,18 @@ const FriendlyCaptcha: FC<Props> = (...) => {
  * React hooks used to manage the `FriendlyCaptcha` component.
  *
  * `forwardRef`
- * → Allows a parent component to pass a ref to this component.
+ * → Allows a parent component to pass a ref to the FriendlyCaptcha component.
  *
  * `useEffect`
  * → Performs setup and cleanup of the FriendlyCaptcha widget.
+ * In the setup, `useEffect`:
+ * creates the FriendlyCaptcha widget,
+ * stores the widget instance for later use (`reset()`/`destroy()`),
+ * registers any required callbacks (such as when the captcha is solved).*
  *
  * `useImperativeHandle`
- * → Exposes the component's public `reset()` method through the ref.
+ * → Exposes the component's public `reset()` method through the ref. 
+ * (ref: the forwarded ref to the FriendlyCaptcha component)
  *
  * `useRef`
  * → Stores a mutable reference to the FriendlyCaptcha widget instance.
