@@ -30,6 +30,7 @@ flowchart TD
     API --> DotDigital
 ```
 
+---
 ## Components and responsibilities
 
 | File                       | Responsibility                                                                                                                          |
