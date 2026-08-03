@@ -114,20 +114,34 @@ All three are converted by `route.ts` into the same response:
 {"error":"Failed captcha"}
 ```
 
-with HTTP `400`.
+The key idea is that **the browser only sees the final symptom, not the underlying cause**.
+
+Here's an expanded version:
+
+---
+
+With HTTP `400`, every failure appears identical to the browser:
+
+```json
+{"error":"Failed captcha"}
+```
 
 This means the browser cannot distinguish between:
 
-- a genuinely invalid user token
+- a genuinely invalid or expired user token
     
 - a FriendlyCaptcha service outage
     
-- an SDK or network failure
+- an SDK or network failure while verifying the token
     
-- a configuration problem
+- a configuration problem (for example, incorrect API credentials)
     
 
-The response is useful for the UI, but it hides the operational cause. Server-side logging or more specific internal error handling would be required to diagnose the difference.
+From the browser's perspective, all four scenarios produce exactly the same response, so the UI can only display a generic **"Failed captcha"** message.
+
+This simplification is appropriate for the user because the recovery action is the same—complete a new captcha challenge and try again. However, it also means the application deliberately hides the underlying operational cause.
+
+To determine **why** the verification failed, developers must inspect server-side logs or enhance the server's error handling to record or categorise the specific failure. Without this additional information, a production issue such as a FriendlyCaptcha outage is indistinguishable from a user simply submitting an invalid or expired captcha token.
 
 ---
 
@@ -167,7 +181,11 @@ This would not crash the feature; it would silently reduce the quality of the us
 
 ---
 
-### `firstName` mapping has not been confirmed against Dotdigital’s schema
+### `firstName` mapping has not been confirmed against Dotdigital's schema
+
+> **Note**
+>
+> The following observations are assumptions based on the current source code and were not investigated as part of the FriendlyCaptcha retry/reset development. They do not affect the behaviour validated by this change.
 
 The outgoing contact payload uses:
 
@@ -188,18 +206,32 @@ This suggests the project has not fully confirmed that Dotdigital expects the fi
 Potential issues include:
 
 - Dotdigital may expect a configured data-field key rather than `firstName`
-    
 - the field may be case-sensitive
-    
 - the account may use a custom field identifier
-    
 - the request may succeed while silently failing to store the first name
-    
+
+For example, the expected payload could potentially be:
+
+```ts
+dataFields: {
+  firstName,
+}
+// Or
+dataFields: {
+  FIRST_NAME: firstName,
+}
+// Or
+dataFields: {
+  DATA_FIELD_123: firstName,
+}
+// etc.
+```
 
 The contact could still be created successfully because the email identifier and list assignment are valid, even if the first-name field is ignored or mapped incorrectly.
 
----
+No further investigation was undertaken because this behaviour is unrelated to the FriendlyCaptcha reset implementation and was not required for validating this change.
 
+---
 ### Email validation trims for checking but submits the raw value
 
 The client validates the email using a trimmed value for some checks, but the submitted value remains the original string.
