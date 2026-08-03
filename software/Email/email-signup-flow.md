@@ -71,12 +71,15 @@ that into a user-facing message.
 
 ## External dependencies
 
-- **DotDigital** — newsletter provider. Contact creation: <https://developer.dotdigital.com/reference/createcontact-1>. Double opt-in (`optInType: verifiedDouble`) means a confirmation email is sent by DotDigital; the user is not fully subscribed until they confirm.
-- **Friendly Captcha** — bot protection. Server verification via `@friendlycaptcha/server-sdk`; widget via `@friendlycaptcha/sdk`.
+- **DotDigital** — newsletter provider. Contact creation is performed using the Dotdigital Contacts API:
+  <https://developer.dotdigital.com/reference/createcontact-1>.
+  The endpoint documents the expected contact payload, response structure, and contact creation behaviour. This application submits the validated email address, first name, mailing-list assignment, and opt-in settings. The configured double opt-in (`optInType: verifiedDouble`) causes Dotdigital to send a confirmation email; the contact is not fully subscribed until the user confirms via the email link.
+
+- **Friendly Captcha** — bot protection. Server-side verification is performed using `@friendlycaptcha/server-sdk`; the browser widget is provided by `@friendlycaptcha/sdk`.
+
+**Note**: The FriendlyCaptcha SDK is the vendor-provided library that handles communication with the FriendlyCaptcha service, allowing the application to verify captcha solutions and manage the captcha widget (for example, resetting it).
 
 ## Gotchas and troubleshooting
-
-The FriendlyCaptcha SDK is the vendor-provided library that handles communication with the FriendlyCaptcha service, allowing the application to verify captcha solutions and manage the captcha widget (for example, resetting it).
 
 ### A FriendlyCaptcha outage looks like a failed captcha
 
@@ -141,7 +144,7 @@ From the browser's perspective, all four scenarios produce exactly the same resp
 
 This simplification is appropriate for the user because the recovery action is the same—complete a new captcha challenge and try again. However, it also means the application deliberately hides the underlying operational cause.
 
-To determine **why** the verification failed, developers must inspect server-side logs or enhance the server's error handling to record or categorise the specific failure. Without this additional information, a production issue such as a FriendlyCaptcha outage is indistinguishable from a user simply submitting an invalid or expired captcha token.
+To determine **why** the verification failed, inspect server-side logs or enhance the server's error handling to record or categorise the specific failure. Without this additional information, a production issue such as a FriendlyCaptcha outage is indistinguishable from a user simply submitting an invalid or expired captcha token.
 
 ---
 
