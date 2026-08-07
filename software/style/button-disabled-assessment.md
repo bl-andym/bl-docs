@@ -1,6 +1,43 @@
 ### Assessment: Two systems that appear to be one.
 
-The Button component uses **two independent mechanisms** to express "disabled," but the SCSS only guards hover against **one** of them. That's the core mismatch.
+The Button component uses **two independent mechanisms** to express "disabled," but the SCSS only guards hover against **one** of them; the core mismatch.
+
+The mismatch is visible directly in the selected DOM and compiled CSS.
+
+**The selected control is rendered as an anchor**:
+
+```html
+<a
+  class="...button ...buttonSmall ...outline"
+  target="_self"
+  href="/visit/yorkshire"
+>
+```
+
+It is **not** rendered as:
+
+```html
+<button disabled>
+```
+
+The compiled hover selector is:
+
+```css
+.outline:not([disabled]):hover,
+.outline:not([disabled]):active,
+.outline:not([disabled]):focus-visible {
+  // why would we want a reduced optacity on btns or a element text at all?
+  opacity: 0.5; 
+}
+```
+
+Because the selected `<a>` has no `disabled` attribute, this condition is true:
+
+```css
+:not([disabled])
+```
+
+Therefore the hover rule applies, as shown by the checked `:hover` state in DevTools.
 
 ---
 ### The two mechanisms:
