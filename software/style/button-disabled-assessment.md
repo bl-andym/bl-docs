@@ -39,6 +39,11 @@ Because the selected `<a>` has no `disabled` attribute, this condition is true:
 
 Therefore the hover rule applies, as shown by the checked `:hover` state in DevTools.
 
+Note: 
+- **`button.outline` without a `disabled` attribute** → ✅ matches `:not([disabled])`, so hover applies `opacity: 0.5`.
+- **`button.outline[disabled]`** → ❌ does **not** match `:not([disabled])`, so hover is blocked.
+- **`a.outline`** → ✅ always matches `:not([disabled])` because anchors don't have a native `disabled` attribute, so the hover rule always applies.
+
 ---
 ### The two mechanisms:
 

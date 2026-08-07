@@ -204,8 +204,11 @@ The widget instance was only available as a local variable within `useEffect()`,
  * → An object exposing a single `reset()` method.
  *
  * `reset()`
- * → The method the parent component can invoke.
+ * → The method the parent component (`EmailSignup`) can invoke.
  * → Calls the FriendlyCaptcha widget's `reset()` method.
+ *
+ * Parent component → `EmailSignup`, renders `FriendlyCaptcha` 
+ * and passes the `captchaWidgetRef` ref.
  *
  * `widgetRef.current?.reset()`
  * → Calls `reset()` on the current FriendlyCaptcha widget instance,
