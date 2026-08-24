@@ -56,6 +56,50 @@ CLASSIFICATION: New feature (domain-based icon suppression for media download gr
 
 No new imports were added. No new types were introduced. No new variables were added; mappedLink was already present and is now used as the source of href in addition to its existing use in ...mappedLink. No package or dependency changes.
 
+Integrate: 
+The arrows mean **“calls / delegates to”**, the flow of control at runtime, not file imports in this file.
+### The chain
+
+```
+map-media-download-grid.ts  →  getLinkIcon (map-link.ts)  →  isBLUkDomain (@bl-web/common)
+```
+
+| Step | What happens |
+|------|----------------|
+| **This file** | Builds `mappedLink`, then calls `getLinkIcon(item.linkType, mappedLink?.href)` |
+| **→ `getLinkIcon`** | Receives `linkType` + `href`. If external, decides which icon to return |
+| **→ `isBLUkDomain`** | Parses `href`, checks host is `bl.uk` or ends with `.bl.uk` |
+| **Result back up the chain** | `true` → no icon · `false` → ↗ icon |
+
+### Why “this file does not import `@bl-web/common` directly”
+
+`map-media-download-grid.ts` only imports from `./map-link`:
+
+```ts
+import { getLinkIcon, mapLink } from './map-link';
+```
+
+It never imports `isBLUkDomain`. That lives in `@bl-web/common` and is used **inside** `getLinkIcon` in `map-link.ts`:
+
+```ts
+// map-link.ts
+import { isBLUkDomain } from '@bl-web/common/utils/is-bl-uk-domain';
+
+export const getLinkIcon = (linkType, href) => {
+  // ...
+  return href && isBLUkDomain(href) ? undefined : 'externalLink';
+};
+```
+
+So the **dependency is indirect**:
+
+- **Direct:** this file depends on `map-link.ts`
+- **Indirect:** this file relies on `@bl-web/common` only because `map-link.ts` does
+
+### In one sentence
+
+This file asks `getLinkIcon` for an icon; `getLinkIcon` asks `isBLUkDomain` whether the URL is BL; the answer flows back as icon or no icon — without this file knowing about `@bl-web/common` at all.
+
 ---
 
 ## 4. BEHAVIOURAL IMPACT
@@ -68,4 +112,8 @@ After: External links whose resolved href has host bl.uk or *.bl.uk do not show 
 
 ## 5. RISK AND SIDE EFFECTS
 
-Low risk. The change is a single additional argument to an existing function call. mappedLink is already computed and in scope; optional chaining (mappedLink?.href) safely handles undefined mappedLink. No change to the number of mapLink invocations or to the structure of the returned data. No changes to mapMediaDownloadGrid's signature or to callers. If getLinkIcon does not accept a second parameter, the extra argument is ignored and behaviour reverts to always showing the external icon for external links.
+Low risk. The change is a single additional argument to an existing function call. mappedLink is already computed and in scope; optional chaining (mappedLink?.href) safely handles undefined mappedLink. No change to the number of mapLink invocations or to the structure of the returned data. No changes to mapMediaDownloadGrid's signature or to callers. 
+
+getLinkIcon(linkType?: 'external' | 'internal' | 'asset', href?: string)
+// Before: getLinkIcon(item.linkType)
+// After: getLinkIcon(item.linkType, mappedLink?.href)

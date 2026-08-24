@@ -77,7 +77,7 @@ Refactor.
 
 ---
 
-## 4. Change 3: getLinkIcon call now receives second argument (href)
+## ## 4. Change 3: getLinkIcon call now receives second argument (href)
 
 ### Before
 
@@ -93,7 +93,7 @@ icon: getLinkIcon(button.link.linkType, mapped?.link?.href),
 
 ### Rationale
 
-`getLinkIcon` (in `map-link.ts`) was extended to accept an optional second parameter, `href`. When `linkType` is `'external'`, it uses `href` to determine whether the link targets a `*.bl.uk` host; if so, it returns `undefined` (no icon) instead of `'externalLink'`. Passing `mapped?.link?.href` supplies the resolved URL for the button's link so that this logic can run. Using the mapped link ensures the href is the final URL (e.g. after any mapping in mapLink), not the raw CMS value. If `mapped` or `mapped.link` is undefined, the second argument is undefined and `getLinkIcon` behaves as before (external links still get `'externalLink'`).
+`getLinkIcon` (in `map-link.ts`) was extended to accept an optional second parameter, `href`. When `linkType` is `'external'`, it uses `href` to determine whether the link targets a `*.bl.uk` host; if so, it returns `undefined` (no icon) instead of `'externalLink'`. Passing `mapped?.link?.href` supplies the resolved URL for the button's link so that this logic can run. Using the mapped link ensures the href is the final URL (e.g. after any mapping in `mapLink`), not the raw CMS value. If `mapped` or `mapped.link` is undefined, the second argument is undefined and `getLinkIcon` behaves as before (external links still get `'externalLink'`).
 
 ### Classification
 
@@ -101,7 +101,7 @@ New feature (domain-based suppression of external link icon for `*.bl.uk`).
 
 ### Dependency
 
-Relies on `getLinkIcon` in `map-link.ts` accepting an optional second parameter (`href?: string`) and on `link-utils` `isBlUkDomain` (or equivalent) for the `*.bl.uk` check. No new imports or dependencies were added in this file.
+Relies on `getLinkIcon` in `map-link.ts` accepting an optional second parameter (`href?: string`). For external links, `getLinkIcon` calls `isBLUkDomain` from `@bl-web/common/utils/is-bl-uk-domain` to perform the `*.bl.uk` check. This file does not import `common` directly, the dependency is indirect via `map-link.ts`. No new imports or dependencies were added in this file.
 
 ---
 

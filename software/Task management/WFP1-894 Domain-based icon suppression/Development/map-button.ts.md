@@ -44,7 +44,16 @@ export const mapButton = (button: Button | undefined): DsLinkButtonData | undefi
   if (!button) {
     return undefined;
   }
-
+  
+/*
+* mapLink is exported from apps/web/src/utils/prop-mappers/map-link.ts.
+* It maps a CMS Link (internal | external | asset) to DsLinkData 
+* from @bl-web/design-system/types:
+* { href?, openInNewTab?, linkType? }. Asset links get a download URL 
+* via createDownloadurl;
+* external/internal pass through href and tab behaviour. 
+* Returns undefined if link is missing or invalid.
+*/
   const mappedLink = mapLink(button.link);
   const linkIcon =
     button.link?.linkType !== 'internal' ? getLinkIcon(button.link?.linkType, mappedLink?.href) : undefined;
@@ -72,7 +81,7 @@ CLASSIFICATION: Refactor (enables passing href); New feature (domain-based icon 
 
 NEW VARIABLE:
 
-  mappedLink. Type: DsLinkData | undefined (inferred from mapLink return type). Holds the result of mapLink(button.link). Used as the link property in both return objects and as the source of href for getLinkIcon.
+  mappedLink (introduced in Rnd 1) Type: DsLinkData | undefined (inferred from mapLink return type). Holds the result of mapLink(button.link). Used as the link property in both return objects and as the source of href for getLinkIcon.
 
 ---
 
@@ -93,7 +102,7 @@ AFTER:
 
 RATIONALE:
 
-When the button link is external, getLinkIcon needs the resolved href to test against isBlUkDomain. Passing mappedLink?.href supplies that value. When the link is internal or asset, the second argument is ignored by getLinkIcon. When mappedLink is undefined (e.g. mapLink returned undefined), href is undefined and getLinkIcon behaves as before for external (returns 'externalLink').
+When the button link is external, `getLinkIcon` needs the resolved `href` to test against BL domains via `isBLUkDomain` in `@bl-web/common` (which is called inside `getLinkIcon` in `map-link.ts`). Passing mappedLink?.href supplies that value. When the link is internal or asset, the second argument is ignored by getLinkIcon. When mappedLink is undefined (e.g. mapLink returned undefined), href is undefined and getLinkIcon behaves as before for external (returns 'externalLink').
 
 CLASSIFICATION: New feature.
 
@@ -129,13 +138,15 @@ RATIONALE:
 
 The mapped link is already computed and stored in mappedLink. Using mappedLink in both return objects removes the duplicate mapLink(button.link) calls and guarantees the returned link is the same object used to derive href for getLinkIcon. Behaviour and return shape are unchanged.
 
-CLASSIFICATION: Refactor. Performance improvement (one fewer mapLink call per invocation when the asset branch is taken).
+CLASSIFICATION: Refactor. Performance improvement (`mapLink` invoked once per `mapButton` call instead of twice — in both asset and default branches).
 
 ---
 
 ## 5. IMPORTS, TYPES, AND DEPENDENCIES
 
 No new imports were added. No new types were introduced. The file still imports DsLinkButtonData, getAssetLabelWithMetadata, Link, getLinkIcon, and mapLink. The only new symbol is the local variable mappedLink inside mapButton. No package or dependency changes.
+
+Round 2 note: No changes to this file in Round 2. Domain check lives in `@bl-web/common`; used indirectly via `getLinkIcon` in `map-link.ts`.
 
 ---
 
@@ -149,4 +160,4 @@ After: External links whose resolved href has host bl.uk or *.bl.uk result in no
 
 ## 7. RISK AND SIDE EFFECTS
 
-Low risk. mapLink is invoked once per mapButton call instead of up to twice. Optional chaining (mappedLink?.href) safely handles undefined mappedLink. If getLinkIcon does not accept a second parameter, the extra argument is ignored and behaviour reverts to always showing the external icon for external links. No changes to callers of mapButton.
+Low risk. `mapLink` is invoked once per `mapButton` call. Optional chaining (`mappedLink?.href`) safely handles undefined `mappedLink`. The returned link is the same object used for icon decisions, so href and navigation URL stay aligned. No changes to callers of `mapButton`.

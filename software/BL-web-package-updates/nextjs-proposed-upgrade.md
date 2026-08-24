@@ -11,13 +11,13 @@ import "@bl-web/css-variables"; // → resolves to src/index.ts → imports 9 SC
 import "@/styles/global.scss";
 ```
  
-The `@bl-web/css-variables` package's `index.ts` side-effect-imports 9 SCSS files that define **all** your CSS custom properties (`--background-secondary`, `--font-sans`, `--color-text-primary`, etc.). Every component SCSS module and `global.scss` depends on these variables being defined first.
+The `@bl-web/css-variables` package's `index.ts` side-effect-imports 9 SCSS files that define **all** CSS custom properties (`--background-secondary`, `--font-sans`, `--color-text-primary`, etc.). Every component SCSS module and `global.scss` depends on these variables being defined first.
  
 Next.js 15.5.10 introduced a change to how CSS is split into webpack chunks. With the new default "strict" CSS chunking strategy, the CSS from `@bl-web/css-variables` (flowing through a TypeScript entry point → multiple SCSS files) can end up in a **different chunk** than the rest of your styles. When these chunks load out of order, the CSS custom properties aren't defined yet when component styles try to use them — so everything breaks visually.
  
 ### Additional Issue: Existing Version Mismatch
  
-Before we even get to 15.5.10, notice these packages are behind in `apps/web/package.json`:
+Before we even get to 15.5.10, these packages are behind in `apps/web/package.json`:
  
 - `next: 15.5.9`
 - `eslint-config-next: 15.5.2` ← already 3 patch versions behind!

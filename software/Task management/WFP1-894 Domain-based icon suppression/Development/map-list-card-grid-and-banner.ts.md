@@ -62,7 +62,11 @@ CLASSIFICATION: New feature (domain-based icon suppression for list card grid an
 
 ## 3. IMPORTS, TYPES, AND DEPENDENCIES
 
-No new imports were added. No new types were introduced. No new variables were added; mappedLink was already present and is now used as the source of href in addition to its existing use as the link property. No package or dependency changes.
+No new imports were added to this file. No new types were introduced. No new variables were added; `mappedLink` was already present and is now used as the source of `href` in addition to its existing use as the `link` property.
+
+Domain-based icon suppression is applied indirectly: this file calls `getLinkIcon` in `map-link.ts`, which imports `isBLUkDomain` from `@bl-web/common/utils/is-bl-uk-domain`. This file does not import `@bl-web/common` directly.
+
+No package or dependency changes in this file.
 
 ---
 
@@ -76,4 +80,4 @@ After: External links whose resolved href has host bl.uk or *.bl.uk do not show 
 
 ## 5. RISK AND SIDE EFFECTS
 
-Low risk. The change is a single additional argument to an existing function call. mappedLink is already computed and in scope; optional chaining (mappedLink?.href) safely handles undefined mappedLink. No change to the number of mapLink invocations or to the structure of the returned data. No changes to mapListCardGridOrBanner's signature or to callers. If getLinkIcon does not accept a second parameter, the extra argument is ignored and behaviour reverts to always showing the external icon for external links.
+Low risk. The change is a single additional argument to an existing function call. mappedLink is already computed and in scope; optional chaining (mappedLink?.href) safely handles undefined mappedLink. No change to the number of mapLink invocations or to the structure of the returned data. No changes to mapListCardGridOrBanner's signature or to callers.

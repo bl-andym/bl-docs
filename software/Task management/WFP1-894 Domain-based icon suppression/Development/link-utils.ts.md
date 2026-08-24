@@ -1,85 +1,182 @@
-**File:** apps/web/src/utils/link-utils.ts
-**Block:** isBlUkDomain(href: string)
+# WFP1-894
+
+**File:** `apps/web/src/utils/link-utils.ts`
 **Feature:** WFP1-894 Domain-based icon suppression
+**Scope:** Round 1 history of `isBLUkDomain`; current role of this file after Round 2
 
 ---
+## 1. Summary
 
-## 1. Summary of Changes
+### Round 1
+`isBLUkDomain(href: string)` was **added to this file**. It parsed a URL and returned `true` when the hostname was `bl.uk` or ended with `.bl.uk`. Existing asset helpers were unchanged.
+### Round 2
+The **implementation moved** to `packages/common/src/utils/is-bl-uk-domain.ts` so design-system could share the same logic. The re-export from this file was **removed**; `map-link.ts` now imports directly from `@bl-web/common`.
+### Current role of this file
 
-A new exported function `isBlUkDomain(href: string)` was added to link-utils.ts. It parses the given URL string and returns true when the hostname is "bl.uk" or ends with ".bl.uk", and false otherwise. No existing functions were modified. No new imports or types were introduced. Existing exports (filesizeToString, getAssetMetadata, getAssetLabelWithMetadata, getAssetTitleWithCreditLine) are unchanged.
-
----
-
-## 2. Change 1: Addition of isBlUkDomain function
-
-### Before
-
-No `isBlUkDomain`. File ended after `getAssetTitleWithCreditLine`:
+**Asset/download helpers only.** It no longer defines or exports `isBLUkDomain`.
 
 ```ts
-  return asset.title + creditLine;
-};
+import type { DsAssetData } from '@bl-web/design-system/types';
+
+export const filesizeToString = ...
+export const getAssetMetadata = ...
+export const getAssetLabelWithMetadata = ...
+export const getAssetTitleWithCreditLine = ...
+
 ```
 
-### After
+---
+## 2. Round 1: original isBLUkDomain implementation (historical)
+
+This code lived in `link-utils.ts` until Round 2:
 
 ```ts
-// Returns true if href's host is bl.uk or *.bl.uk
-export const isBlUkDomain = (href: string): boolean => {
-  try {
-    const host = new URL(href).hostname;
-    return host === 'bl.uk' || host.endsWith('.bl.uk');
-  } catch {
-    return false;
-  }
+export const isBLUkDomain = (href: string): boolean => {
+
+try {
+
+const host = new URL(href).hostname;
+
+return host === 'bl.uk' || host.endsWith('.bl.uk');
+
+} catch {
+
+return false;
+
+}
+
 };
+
 ```
 
-### Rationale
-
-Callers need a single place to determine whether a link URL belongs to the bl.uk organisation (apex bl.uk or any subdomain *.bl.uk). This is used to decide whether to show the "external link" icon for external links: links to bl.uk or *.bl.uk should not show the icon. Centralising the check in link-utils.ts keeps all link-related helpers in one module and avoids duplicating URL parsing and host logic elsewhere. The try/catch ensures invalid or non-URL strings (e.g. relative paths, malformed URLs) do not throw; they yield false so callers can treat them as non-bl.uk.
-
-### Classification
-
-New feature.
+**Rationale:** Single place to detect BL organisation URLs for domain-based icon suppression. Try/catch ensures invalid URLs return `false` without throwing.
 
 ---
 
-## 3. Function signature and behaviour
+## 3. Round 2: why the implementation left this file
 
-- **Name:** `isBlUkDomain`
-- **Parameters:** `href` (string). The URL or URL-like string to test.
-- **Return type:** `boolean`
+`IllustrationCard`, `BipcButton`, and `RichText` live in **`packages/design-system`**. Design-system **cannot import from `apps/web`** (circular dependency: web → design-system → web).
 
-**Behaviour:**
+Both packages depend on **`@bl-web/common`**, so the domain check belongs there:
 
-- Parses `href` via the URL constructor (`new URL(href)`).
-- Reads the hostname (e.g. "www.bl.uk", "blogs.bl.uk", "bl.uk").
-- Returns `true` if hostname is exactly "bl.uk" or ends with ".bl.uk".
-- Returns `false` for any other hostname or if parsing throws (invalid URL, relative path, etc.).
+```
 
-No new variables are exported. The only local variable is `host` inside the function. No new types are introduced; the function uses the built-in URL and string methods. No new dependencies; URL is a global in the runtime.
+@bl-web/common/is-bl-uk-domain.ts ← single implementation
+          ↑           |      ↑
+design-system         |   apps/web
+(getExternalLinkIcon) |   (map-link.ts — direct import)
+
+```
+
+`link-utils.ts` is **not** in this path anymore.
+
+### Before (Round 1)
+
+`isBLUkDomain` lived only in the web app:
+
+```
+apps/web/link-utils.ts  ← defined isBLUkDomain here
+         ↑
+    map-link.ts → getLinkIcon()
+         ↑
+   prop mappers (buttons, cards, etc.)
+
+design-system  ← no access (can't import apps/web)
+RichText, etc.   ← linkType === 'external' only → always ↗
+```
+
+### Middle (Round 2, with re-export)
+
+Logic moved to `common`, but web still imported via `link-utils`:
+
+```
+@bl-web/common/is-bl-uk-domain.ts  ← single implementation
+         ↑                    ↑
+design-system              link-utils.ts (re-export)
+(getExternalLinkIcon)         ↑
+                           map-link.ts → getLinkIcon()
+```
+
+Extra hop: `common → link-utils → map-link`
+
+### Now (current, simplified)
+
+Re-export removed, both consumers import from `common` directly:
+
+```
+@bl-web/common/is-bl-uk-domain.ts  ← single implementation
+         ↑                    ↑
+design-system              map-link.ts
+(getExternalLinkIcon)      (getLinkIcon)
+
+link-utils.ts  →  asset helpers only (filesize, metadata, etc.)
+                 no isBLUkDomain
+```
+
+### One-line summary
+
+**Before:** domain check in web only; design-system couldn't use it.  
+**Middle:** shared in `common`, but web went through a re-export shim.  
+**Now:** one implementation in `common`; web and design-system import it directly; `link-utils.ts` is back to asset helpers only.
+
 
 ---
+## 4. isBLUkDomain behaviour (now in common)
 
-## 4. Imports, types, and dependencies
+**File:** `packages/common/src/utils/is-bl-uk-domain.ts`
+**Tests:** `packages/common/src/utils/is-bl-uk-domain.test.ts`
 
-No new imports were added. The file still imports only: `DsAssetData` from `@bl-web/design-system/types`. That type is used only by the existing asset helpers, not by `isBlUkDomain`. `isBlUkDomain` does not depend on any project-specific types or modules. No package.json or other dependency changes are implied by this file.
+| Input | Result |
+|-------|--------|
+| `http://bl.uk` | `true` |
+| `https://www.bl.uk/foo` | `true` |
+| `https://iiif.bl.uk/uv/#?manifest=...` | `true` |
+| `https://google.com` | `false` |
+| `/about` (relative) | `false` |
+| Invalid string | `false` |
+
+Unit testing **isBLUkDomain**:
+```
+cd packages/common && npm run test -- is-bl-uk-domain
+
+//From the repo root:
+npm run test -w @bl-web/common -- is-bl-uk-domain
+```
 
 ---
-
 ## 5. Usage and integration
 
-`isBlUkDomain` is intended to be called by code that decides whether to show an external link icon (e.g. `getLinkIcon` in map-link.ts). When linkType is "external", the caller passes the resolved href to `getLinkIcon`; `getLinkIcon` (or a helper it uses) can call `isBlUkDomain(href)` and, when true, return undefined (no icon) instead of "externalLink". This file does not call `isBlUkDomain`; it only defines and exports it.
+### Who uses isBLUkDomain
+
+| Consumer | Import path |
+|----------|-------------|
+| `map-link.ts` → `getLinkIcon()` | `@bl-web/common/utils/is-bl-uk-domain` |
+| `get-external-link-icon.ts` (design-system) | `@bl-web/common/utils/is-bl-uk-domain` 
+
+### Who uses link-utils.ts (this file)
+
+Asset helpers only — no domain check:
+
+| Consumer | Uses |
+|----------|------|
+| `map-button.ts`, `map-rich-text.ts` | `getAssetLabelWithMetadata` |
+| `map-list-card-grid-and-banner.ts`, `map-media-download-grid.ts` | `getAssetMetadata`, `getAssetTitleWithCreditLine` |
 
 ---
+## 6. Edge cases and risk
 
-## 6. Edge cases and error handling
+**Edge cases:**  invalid/relative URLs return `false`.
 
-Relative URLs (e.g. "/path") or invalid strings passed to `new URL(href)` will throw in most runtimes; the catch block returns false, so `isBlUkDomain` does not throw. Protocol-relative URLs (e.g. "//www.bl.uk") may parse depending on context; if they parse, hostname is read and the same bl.uk / *.bl.uk logic applies. No explicit handling for null or undefined is present; passing a non-string will cause `new URL(href)` or host access to fail and the catch block will return false.
+**Risk:** Low. Round 2 removal of `isBLUkDomain` from this file does not affect asset-helper callers. Domain logic is unchanged; only its module location changed.
 
 ---
+## 7. Related files (WFP1-894)
 
-## 7. Risk and side effects
+| File | Role |
+|------|------|
+| `packages/common/src/utils/is-bl-uk-domain.ts` | Domain check implementation |
+| `apps/web/src/utils/prop-mappers/map-link.ts` | `getLinkIcon()` — web icon decision |
+| `packages/design-system/src/utils/get-external-link-icon.ts` | Design-system icon decision |
+| `RichText`, `IllustrationCard`, `BipcButton` | Components using `getExternalLinkIcon()` |
 
-Low risk. The change is additive only. Existing callers of link-utils.ts are unaffected. New callers that depend on `isBlUkDomain` must pass a string href; behaviour for non-URL strings is defined as false. No performance impact on existing functions. No security-sensitive logic beyond reading the hostname of a URL; the function does not execute or navigate to the URL.
+**Concept:** Domain-based icon suppression, decide external icon (↗) from **destination domain**, not CMS **link type** alone.
