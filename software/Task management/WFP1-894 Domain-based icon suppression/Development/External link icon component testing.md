@@ -314,35 +314,35 @@ Asset = download (any link with linkType: 'asset', usually Sanity-hosted files, 
       <td>List card grid → item link<br><br>List page only</td>
       <td><strong>linkIcon</strong> / <code>getLinkIcon</code></td>
       <td>BL external: no ↗; non-BL external: ↗; internal: →; asset: download</td>
-      <td>Todo</td>
+      <td>Pass</td>
     </tr>
     <tr>
       <td></td>
       <td>List card banner → item link</td>
       <td><strong>linkIcon</strong> / <code>getLinkIcon</code></td>
       <td>BL external: no ↗; non-BL external: ↗; internal: →; asset: download</td>
-      <td></td>
+      <td>Pass</td>
     </tr>
     <tr>
       <td><strong>MediaDownloadGrid items</strong></td>
       <td>Media download grid → item link (if external)</td>
       <td><strong>linkIcon</strong> / <code>getLinkIcon</code></td>
       <td>BL external: no ↗; non-BL external: ↗; asset: download</td>
-      <td></td>
+      <td>Pass</td>
     </tr>
     <tr>
       <td><strong>Hub hero banner</strong></td>
       <td>Hub page hero → button icons (via <code>map-hub-hero-banner</code>)</td>
       <td><strong>mapButton</strong> or <strong>getLinkIcon</strong></td>
       <td>BL external: no ↗; non-BL external: ↗; internal: →; asset: download</td>
-      <td></td>
+      <td>Pass</td>
     </tr>
     <tr>
       <td><strong>Button banner</strong></td>
       <td>Button banner block → per-button icons (via <code>map-button-banner</code>)</td>
       <td><strong>mapButton</strong></td>
       <td>BL external: no ↗; non-BL external: ↗; internal: →; asset: download</td>
-      <td></td>
+      <td>Pass</td>
     </tr>
   </tbody>
 </table>
