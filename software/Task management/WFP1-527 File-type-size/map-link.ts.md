@@ -1,126 +1,196 @@
-**File:** `apps/web/src/utils/prop-mappers/map-link.ts`  
-**Block:** Runtime Safety & Type Narrowing Fix
+**File:** `apps/web/src/utils/prop-mappers/map-link.ts`
+**Block:** Runtime safety and type narrowing (`mapLink` asset branch)
 **Feature:** WFP1-527 asset file type and size display
 
 ## Bird's-eye view
 
-This change fixes a **runtime crash risk** when handling partially
-populated CMS data and improves **TypeScript narrowing correctness**.
+This change fixes a **runtime crash** when handling partially populated CMS asset links and improves **TypeScript narrowing**.
 
-The issue stemmed from unsafe use of the `in` operator on a value that
-could be `null` or `undefined`.
+The issue was unsafe use of the `in` operator on a value that can be `null`.
 
-## Problem Summary
+`mapLink` turns a CMS link (`internal` / `external` / `asset`) into `DsLinkData` (`href`, `linkType`, `openInNewTab`). For assets it builds a download URL via `createDownloadurl`.
+
+This change does **not** add file format or size to labels (that is `mapRichText` / `mapButton`). It only prevents a throw when an asset link has no resolved file or image.
+
+## Problem summary
 
 The original implementation assumed that:
 
-``` ts
+```ts
+
 'asset' in link
+
 ```
 
 implies:
 
-``` ts
+```ts
+
 link.asset is a valid object
+
 ```
 
-This is **not true**.
+That is **not** true. A property can exist and still be:
 
-A property can exist but still be:
+```ts
 
-``` ts
 { asset: undefined }
+
 { asset: null }
+
 ```
 
-Using the `in` operator on such values causes a runtime error.
+GROQ can return `{ linkType: 'asset', asset: null }` when:
 
-## Before (Unsafe)
+- Link type is Asset but no file/image is chosen
+- The file/image was cleared and type left as Asset
+- The referenced asset was unpublished or deleted  
 
-**File:** `map-link.ts`
+`'asset' in link` is then **true**. `'assetType' in link.asset` becomes `'assetType' in null` and throws:
 
-``` ts
+`Cannot use 'in' operator to search for 'assetType' in null`
+
+Because `mapLink` is used across cards, buttons, rich text, and footer, one incomplete asset link could take down a page (or the whole layout, if it was in footer copyright).
+
+## Before (unsafe)
+
+```ts
+
 case 'asset': {
-  if (!('asset' in link) || !('assetType' in link.asset)) {
-    return undefined;
-  }
 
-  return {
-    href: createDownloadurl(link),
-    openInNewTab: false,
-    linkType: 'asset',
-  };
+if (!('asset' in link) || !('assetType' in link.asset)) {
+
+return undefined;
+
 }
+
+  
+
+return {
+
+href: createDownloadurl(link),
+
+openInNewTab: false,
+
+linkType: 'asset',
+
+};
+
+}
+
 ```
 
-### Why this is risky
 
-1.  'asset' in link → only checks property existence\
-2.  link.asset may still be null or undefined\
-3.  'assetType' in link.asset → can throw
+**Rationale (before):** The guard assumed that if the `asset` **key** existed, `link.asset` was an object with `assetType`. That is true for a complete GROQ payload, not for a null payload.
 
-## After (Safe)
+**Why this is risky:**
 
-**File:** `map-link.ts`
+1. `'asset' in link` only checks property existence
+2. `link.asset` may still be `null` or `undefined`
+3. `'assetType' in link.asset` can throw
+## After (safe)
 
-``` ts
+```ts
+
 case 'asset': {
-  if (!('asset' in link) || !link.asset || !('assetType' in link.asset)) {
-    return undefined;
-  }
 
-  return {
-    href: createDownloadurl(link),
-    openInNewTab: false,
-    linkType: 'asset',
-  };
+if (!('asset' in link) || !link.asset || !('assetType' in link.asset)) {
+
+return undefined;
+
 }
+
+  
+
+return {
+
+href: createDownloadurl(link),
+
+openInNewTab: false,
+
+linkType: 'asset',
+
+};
+
+}
+
 ```
 
-## Rationale
+| Check | Meaning |
+| --- | --- |
+| `!('asset' in link)` | No `asset` property (incomplete TypeScript union member) |
+| `!link.asset` | Property exists but is `null` / missing payload |
+| `!('assetType' in link.asset)` | Object present but not a resolved image/file asset |
 
-The `!link.asset` guard ensures that `link.asset` is not null or undefined before using the `in` operator.
+Any of these → `undefined` (no link), same as an unusable internal link with no `href`. Complete asset links are unchanged: still `createDownloadurl` → `/api/download/…` or CDN `?dl`.
+## Rationale (after)
 
-- `'asset' in link` only guarantees the property exists — not that it has a usable value  
-- Without this guard, `'assetType' in link.asset` can throw at runtime if `link.asset` is null or undefined  
-- This protects against malformed or partially populated CMS data  
+The `!link.asset` guard ensures `link.asset` is not `null` or `undefined` before using `in`.
 
-**Net effect:** prevents runtime crashes and ensures the function fails safely (`undefined`) instead of breaking execution.
-## Additional Context: File Size & Type Handling
+- `'asset' in link` only guarantees the property exists — not that it has a usable value
+- Without this guard, `'assetType' in link.asset` can throw at runtime
+- This protects against malformed or partially populated CMS data
+- Footer and other surfaces now run more portable text through `mapLink`, so an empty asset must not crash 
 
-Displaying file metadata (size/type) requires a valid asset object. Even
-after GROQ/schema fixes, edge cases may still produce:
+**Net effect:** fail safely (`undefined`) instead of breaking execution.
+## Additional context: file size and type
 
-``` ts
+Displaying file metadata (size/type) requires a valid asset object. Even after GROQ/schema work, edge cases may still produce:
+
+  
+
+```ts
+
 link.linkType === 'asset'
+
 ```
+
+  
 
 but:
 
-``` ts
-link.asset === undefined | null
+  
+
+```ts
+
+link.asset === null | undefined
+
 ```
+
+  
 
 This change:
 
--   does NOT add metadata handling\
--   DOES prevent runtime crashes
+  
 
-Without the guard:
+- does **not** add metadata handling
 
-``` ts
-'assetType' in link.asset
-```
+- **does** prevent runtime crashes
 
-can throw before UI renders.
+  
 
-## Net Effect
+Without the guard, `'assetType' in link.asset` can throw before the UI renders.
 
--   Prevents runtime crashes
--   Handles malformed CMS data safely
--   Ensures fail-safe behaviour
--   Protects UI rendering paths
+  
 
-## Key Takeaway
+## Impact on other components
 
-The `in` operator checks property existence --- not value validity.
+  
+
+Shared by every caller of `mapLink`. Valid CMS asset links behave as before. Only incomplete asset links change: they no longer throw; they render as non-links.
+
+  
+
+## Where it is used
+
+  
+
+Exported from `apps/web/src/utils/prop-mappers/map-link.ts`. Callers include `mapButton`, `mapRichText`, `mapFooter` (social/secondary — not assets in CMS), card/list/logo mappers, and navigation.
+
+  
+
+## Key takeaway
+
+  
+
+The `in` operator checks property **existence**, not value validity.
