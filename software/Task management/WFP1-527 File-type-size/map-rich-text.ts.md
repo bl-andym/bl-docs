@@ -1,7 +1,6 @@
 **File:** `apps/web/src/utils/prop-mappers/map-rich-text.ts`
 **Block:** `mapRichTextBlockWithLinks` (asset link children)
 **Feature:** WFP1-527 asset file type and size display
-
 ## Purpose
 
 `mapRichText` walks Sanity portable text, runs each link mark through `mapLink`, and for `linkType: 'asset'` rewrites the linked words with `getAssetLabelWithMetadata` so the visible text is `{title} ({EXT}, {size})`, e.g. `Annual report (PDF, 1.2MB)`.
