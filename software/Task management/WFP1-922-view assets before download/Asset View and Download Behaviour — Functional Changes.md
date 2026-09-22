@@ -1,0 +1,11 @@
+|File|Before|After|
+|---|---|---|
+|`api/download/[assetId]/route.ts`|Image assets returned with `Content-Disposition: attachment`, always forcing a download.|Reads an `action` query parameter. `action=download` returns `attachment`; otherwise defaults to `view` and returns `inline`, allowing browser viewing.|
+|`config/config.ts`|Local config had no `customAssetsDomain`.|Local config sets `customAssetsDomain: 'https://cdn.sanity.io'`.|
+|`sanity/file.ts`|`createDownloadurl()` had no context. Images used the API download route; files were passed directly to `createFileUrl()`.|`createDownloadurl(assetData, context?)` propagates context. Images generate `action=download` only for Media Download Grid, otherwise `action=view`. Files also receive the context.|
+|`sanity/image.ts`|Image URL builder always used Sanity's normal/default base URL behaviour. File URLs always had `?dl`, forcing downloads.|Image URL builder can use `customAssetsDomain`. File URLs use `customAssetsDomain ?? baseUrl`; `?dl` is added **only** when context is `mediaDownloadGrid`.|
+|`map-button.ts`|Buttons mapped links without context; asset icon behaviour was determined globally.|`mapButton()` accepts optional context and passes it through to `mapLink()` and `getLinkIcon()`, allowing context-specific asset behaviour.|
+|`map-email-signup.ts`|Mapper returned placeholder `form` and `captcha` values that were later replaced by the renderer.|Return type excludes `form` and `captcha`; mapper no longer creates placeholders. The renderer remains responsible for supplying the real values.|
+|`map-link.ts`|Asset links had no contextual distinction; asset links always received the download icon.|`mapLink()` accepts context and passes it to URL generation. `getLinkIcon()` also accepts context; asset links get the download icon only when context is `mediaDownloadGrid`. Also includes defensive handling for null/incomplete asset data.|
+|`map-media-download-grid.ts`|Cards used normal `mapLink(item)` and normal icon mapping.|**Card items specifically** pass `mediaDownloadGrid` context to link and icon mapping, making cards the explicit download surface.|
+|`map-rich-text.ts`|Rich-text asset links were mapped without context.|Rich-text mapping accepts optional context and can propagate it through to `mapLink()`.|
