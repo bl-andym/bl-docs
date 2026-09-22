@@ -33,6 +33,7 @@ Show one file's stashed changes
 ```bash
 git diff 'stash@{0}^1' 'stash@{0}' -- path/to/file
 ```
+<sup>Note: `^1` means **the first parent of the stash commit**: effectively the commit the branch was on when that stash was created.</sup>
 
 Apply stash — keeps stash
 
